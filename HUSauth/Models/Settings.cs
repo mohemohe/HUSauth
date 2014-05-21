@@ -89,6 +89,8 @@ namespace HUSauth.Models
             }
             else
             {
+                Settings.ID = null;
+                Settings.Password = "";
                 Settings.Hash = hash;
             }
 
