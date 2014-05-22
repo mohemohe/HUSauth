@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using Livet.Behaviors.ControlBinding;
 using System.Security;
+using Microsoft.Win32;
 
 namespace HUSauth.ViewModels
 {
@@ -73,6 +74,8 @@ namespace HUSauth.ViewModels
             {
                 ID = Settings.ID;
                 Password = Settings.Password;
+
+                SystemEvents.PowerModeChanged += new PowerModeChangedEventHandler(SystemEvents_PowerModeChanged);
             }
 
             var IsConnected = false;
@@ -90,6 +93,31 @@ namespace HUSauth.ViewModels
             else
             {
                 ChangeStatusBarString("認証されていません");
+            }
+        }
+
+        private async void SystemEvents_PowerModeChanged(object sender, PowerModeChangedEventArgs e)
+        {
+            //TODO:IPアドレスのチェック
+
+            ChangeStatusBarString("ネットワーク認証を確認しています");
+
+            var IsConnected = false;
+
+            try
+            {
+                IsConnected = await Task.Run(() => Network.AuthenticationCheck());
+            }
+            catch { }
+
+            if (IsConnected)
+            {
+                ChangeStatusBarString("認証されています");
+                return;
+            }
+            else
+            {
+                Login();
             }
         }
 
