@@ -10,11 +10,22 @@ using HUSauth.Views;
 using System.Windows.Forms;
 using System.Collections.Specialized;
 using System.Net;
+using System.Net.NetworkInformation;
 
 namespace HUSauth.Models
 {
     public class Network
     {
+        private static System.Timers.Timer timer;
+
+        public static bool IsAvailable()
+        {
+            //TODO: ping randgrid.ghippos.net がタイムアウトになるかどうか
+
+            //return NetworkInterface.GetIsNetworkAvailable(); //信用できない
+            return true;
+        }
+
         public static bool AuthenticationCheck()
         {
             var html = HtmlReader.HtmlRead("http://randgrid.ghippos.net/check.html");
@@ -53,7 +64,7 @@ namespace HUSauth.Models
             }
             catch (Exception ex)
             {
-                //TODO:いつかちゃんと処理書こうな？
+                //TODO: いつかちゃんと処理書こうな？
                 throw ex;
             }
             
@@ -73,6 +84,19 @@ namespace HUSauth.Models
             }
 
             return true;
+        }
+
+        public static void StartAuthenticationCheckTimer()
+        {
+            timer.Interval = 5000;
+
+            //TODO: だってタイマー駆動するしかないじゃない！
+        }
+
+        public static void AuthenticationCheckTimer()
+        {
+            //5秒ごとにpingする
+            //成功すれば認証済み
         }
     }
 }

@@ -98,7 +98,10 @@ namespace HUSauth.ViewModels
 
         private async void SystemEvents_PowerModeChanged(object sender, PowerModeChangedEventArgs e)
         {
-            //TODO:IPアドレスのチェック
+            if (Network.IsAvailable() == true)
+            {
+                return;
+            }
 
             ChangeStatusBarString("ネットワーク認証を確認しています");
 
@@ -108,7 +111,10 @@ namespace HUSauth.ViewModels
             {
                 IsConnected = await Task.Run(() => Network.AuthenticationCheck());
             }
-            catch { }
+            catch
+            {
+                ChangeStatusBarString("ネットワークに接続されていません");
+            }
 
             if (IsConnected)
             {
