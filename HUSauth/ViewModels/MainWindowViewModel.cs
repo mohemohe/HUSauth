@@ -64,6 +64,8 @@ namespace HUSauth.ViewModels
          * 自動的にUIDispatcher上での通知に変換されます。変更通知に際してUIDispatcherを操作する必要はありません。
          */
 
+        public Network network;
+
         public async void Initialize()
         {
             ChangeStatusBarString("ネットワーク認証を確認しています");
@@ -94,6 +96,13 @@ namespace HUSauth.ViewModels
             {
                 ChangeStatusBarString("認証されていません");
             }
+
+            network = new Network();
+            var listener = new PropertyChangedEventListener(network);
+            listener.RegisterHandler((sender, e) => StatusBarUpdateHandler(sender, e));
+            this.CompositeDisposable.Add(listener);
+
+            network.StartAuthenticationCheckTimer();
         }
 
         private async void SystemEvents_PowerModeChanged(object sender, PowerModeChangedEventArgs e)
@@ -109,7 +118,7 @@ namespace HUSauth.ViewModels
 
             try
             {
-                IsConnected = await Task.Run(() => Network.AuthenticationCheck());
+                IsConnected = await Task.Run(() => Network.IsAvailable());
             }
             catch
             {
@@ -119,7 +128,6 @@ namespace HUSauth.ViewModels
             if (IsConnected)
             {
                 ChangeStatusBarString("認証されています");
-                return;
             }
             else
             {
@@ -269,6 +277,14 @@ namespace HUSauth.ViewModels
             StatusBarString = str;
         }
 
+        private void StatusBarUpdateHandler(object sender, PropertyChangedEventArgs e)
+        {
+            var worker = sender as Network;
+            if (e.PropertyName == "NetworkStatusString")
+            {
+                ChangeStatusBarString(worker.NetworkStatusString);
+            }
+        }
 
         #region ID変更通知プロパティ
         private string _ID;
@@ -304,7 +320,6 @@ namespace HUSauth.ViewModels
             }
         }
         #endregion
-
 
     }
 }
