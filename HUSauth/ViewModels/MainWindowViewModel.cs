@@ -216,9 +216,16 @@ namespace HUSauth.ViewModels
             await Task.Run(() => Network.DoAuth(id, password));
 
             int i = 0;
-            while (i < 12)
+            while (i < 60)
             {
-                var IsConnected = await Task.Run(() => Network.AuthenticationCheck());
+                var IsConnected = false;
+
+                try
+                {
+                    IsConnected = await Task.Run(() => Network.AuthenticationCheck()); //TODO: あとでIsAvailableにする
+                }
+                catch { }
+
                 if (IsConnected)
                 {
                     ChangeStatusBarString("認証されています");
@@ -229,7 +236,8 @@ namespace HUSauth.ViewModels
                     ChangeStatusBarString("認証中...");
                 }
 
-                await Task.Run(() => Thread.Sleep(5000));
+                await Task.Run(() => Thread.Sleep(1000));
+                i++;
             }
 
             ChangeStatusBarString("認証に失敗しました");
