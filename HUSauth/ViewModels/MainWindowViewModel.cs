@@ -1,22 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.ComponentModel;
+using System.Drawing;
+using System.Linq;
+using System.Security;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+using Microsoft.Win32;
 
 using Livet;
+using Livet.Behaviors.ControlBinding;
 using Livet.Commands;
+using Livet.EventListeners;
 using Livet.Messaging;
 using Livet.Messaging.IO;
-using Livet.EventListeners;
 using Livet.Messaging.Windows;
 
 using HUSauth.Models;
-using System.Threading.Tasks;
-using System.Threading;
-using Livet.Behaviors.ControlBinding;
-using System.Security;
-using Microsoft.Win32;
 
 namespace HUSauth.ViewModels
 {
@@ -64,6 +67,7 @@ namespace HUSauth.ViewModels
          * 自動的にUIDispatcher上での通知に変換されます。変更通知に際してUIDispatcherを操作する必要はありません。
          */
 
+        private static NotifyIcon notifyIcon;
         public Network network;
 
         public void Initialize()
@@ -79,6 +83,25 @@ namespace HUSauth.ViewModels
 
                 SystemEvents.PowerModeChanged += new PowerModeChangedEventHandler(SystemEvents_PowerModeChanged);
             }
+
+            notifyIcon = new NotifyIcon();
+            notifyIcon.Icon = new Icon(System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("HUSauth.Views.Resource.HUSauth_tasktray.ico"));
+            notifyIcon.Visible = true;
+
+            notifyIcon.DoubleClick += (sender, e) => Restore();
+
+            var cms = new ContextMenuStrip();
+            var tsm0 = new ToolStripMenuItem();
+            var tsm1 = new ToolStripMenuItem();
+
+            tsm0.Text = "Restore";
+            tsm1.Text = "Exit";
+            cms.Items.AddRange(new ToolStripMenuItem[] { tsm0, tsm1 });
+
+            tsm0.Click += (sender, e) => Restore();
+            tsm1.Click += (sender, e) => Exit();
+
+            notifyIcon.ContextMenuStrip = cms;
 
             network = new Network();
             var listener = new PropertyChangedEventListener(network);
@@ -115,6 +138,11 @@ namespace HUSauth.ViewModels
             else
             {
                 Login();
+
+                if (IsShowTaskBar == false)
+                {
+                    ShowNotifyBaloon("自動認証成功", "ネットワークの自動認証に成功しました");
+                }
             }
         }
 
@@ -137,19 +165,44 @@ namespace HUSauth.ViewModels
 
         public void Close()
         {
+            IsShowTaskBar = false;
+            Messenger.Raise(new WindowActionMessage(WindowAction.Minimize, "Close"));
+        }
+        #endregion
+
+
+
+        #region ExitCommand
+        private ViewModelCommand _ExitCommand;
+
+        public ViewModelCommand ExitCommand
+        {
+            get
+            {
+                if (_ExitCommand == null)
+                {
+                    _ExitCommand = new ViewModelCommand(Exit);
+                }
+                return _ExitCommand;
+            }
+        }
+
+        public void Exit()
+        {
             if (ID != null && Password != null)
             {
-                //if (Settings.ID == null && Settings.Password == null)
-                //{
-                    Settings.ID = ID;
-                    Settings.Password = Password;
-                //}
+                Settings.ID = ID;
+                Settings.Password = Password;
 
                 Settings.WriteSettings();
             }
+            notifyIcon.Visible = false;
+            notifyIcon.Dispose();
+
             Messenger.Raise(new WindowActionMessage(WindowAction.Close, "Close"));
         }
         #endregion
+
 
 
         #region MinimizeCommand
@@ -173,6 +226,28 @@ namespace HUSauth.ViewModels
         }
         #endregion
 
+
+        #region RestoreCommand
+        private ViewModelCommand _RestoreCommand;
+
+        public ViewModelCommand RestoreCommand
+        {
+            get
+            {
+                if (_RestoreCommand == null)
+                {
+                    _RestoreCommand = new ViewModelCommand(Restore);
+                }
+                return _RestoreCommand;
+            }
+        }
+
+        public void Restore()
+        {
+            IsShowTaskBar = true;
+            Messenger.Raise(new WindowActionMessage(WindowAction.Active, "Active"));
+        }
+        #endregion
 
 
         #region LoginCommand
@@ -213,7 +288,7 @@ namespace HUSauth.ViewModels
 
                 try
                 {
-                    IsConnected = await Task.Run(() => Network.AuthenticationCheck()); //TODO: あとでIsAvailableにする
+                    IsConnected = await Task.Run(() => Network.IsAvailable());
                 }
                 catch { }
 
@@ -234,7 +309,6 @@ namespace HUSauth.ViewModels
             ChangeStatusBarString("認証に失敗しました");
         }
         #endregion
-
 
 
         #region StatusBarString変更通知プロパティ
@@ -268,6 +342,25 @@ namespace HUSauth.ViewModels
                 ChangeStatusBarString(worker.NetworkStatusString);
             }
         }
+
+
+        #region IsShowTaskBar変更通知プロパティ
+        private bool _IsShowTaskBar = true;
+
+        public bool IsShowTaskBar
+        {
+            get
+            { return _IsShowTaskBar; }
+            set
+            { 
+                if (_IsShowTaskBar == value)
+                    return;
+                _IsShowTaskBar = value;
+                RaisePropertyChanged();
+            }
+        }
+        #endregion
+
 
         #region ID変更通知プロパティ
         private string _ID;
@@ -304,5 +397,41 @@ namespace HUSauth.ViewModels
         }
         #endregion
 
+
+        #region public static void ShowNotifyBaloon()
+        public static void ShowNotifyBaloon(string title, string body)
+        {
+            if (notifyIcon.Visible == true && notifyIcon.Icon != null)
+            {
+                notifyIcon.BalloonTipTitle = title;
+                notifyIcon.BalloonTipText = body;
+
+                notifyIcon.ShowBalloonTip(10000);
+            }
+        }
+
+        public static void ShowNotifyBaloon(string title, string body, int timeout)
+        {
+            if (notifyIcon.Visible == true && notifyIcon.Icon != null)
+            {
+                notifyIcon.BalloonTipTitle = title;
+                notifyIcon.BalloonTipText = body;
+
+                notifyIcon.ShowBalloonTip(timeout);
+            }
+        }
+
+        public static void ShowNotifyBaloon(string title, string body, ToolTipIcon icon, int timeout)
+        {
+            if (notifyIcon.Visible == true && notifyIcon.Icon != null)
+            {
+                notifyIcon.BalloonTipTitle = title;
+                notifyIcon.BalloonTipText = body;
+                notifyIcon.BalloonTipIcon = icon;
+
+                notifyIcon.ShowBalloonTip(timeout);
+            }
+        }
+        #endregion
     }
 }
