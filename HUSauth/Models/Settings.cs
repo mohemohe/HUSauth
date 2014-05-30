@@ -15,6 +15,8 @@ namespace HUSauth.Models
     {
         public byte[] Hash;
         public string ID;
+
+        //TODO: SecureStringにしたほうがいいだろうけど全部変えるとどうやってバインドすればいいのか分からぬ
         public string EncryptedPassword;
     }
 

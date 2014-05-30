@@ -17,7 +17,7 @@ namespace HUSauth.Models
 {
     public class Network : NotificationObject
     {
-        private static System.Timers.Timer timer;
+        private System.Timers.Timer timer = new System.Timers.Timer();
 
         public static bool IsAvailable()
         {
@@ -73,17 +73,31 @@ namespace HUSauth.Models
             nvc.Add("lang", "ja");
             nvc.Add("event", "1");
 
-            byte[] resData;
-            try
+            byte[] resData = null; // これ動くんですかね？
+
+            int i = 0;
+            while (i < 5) // 5回くらい試行しとけばいいかな
             {
-                resData = wc.UploadValues("http://gonet.localhost/cgi-bin/guide.cgi", nvc);
+                try
+                {
+                    resData = wc.UploadValues("http://gonet.localhost/cgi-bin/guide.cgi", nvc);
+                }
+                catch (Exception e)
+                {
+                    //TODO: いつかちゃんと処理書こうな？
+
+                    if (i < 5)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+
+                break;
             }
-            catch (Exception e)
-            {
-                //TODO: いつかちゃんと処理書こうな？
-                throw e;
-            }
-            
             wc.Dispose();
 
             var resText = "";
@@ -123,10 +137,15 @@ namespace HUSauth.Models
 
         public void StartAuthenticationCheckTimer()
         {
-            timer = new System.Timers.Timer();
-                timer.Elapsed += new System.Timers.ElapsedEventHandler(AuthenticationCheckTimer);
-                timer.Interval = 5000;
-                timer.Enabled = true;
+            timer.Elapsed += new System.Timers.ElapsedEventHandler(AuthenticationCheckTimer);
+            timer.Interval = 5000;
+            timer.Enabled = true;
+        }
+
+        public void StopAuthenticationCheckTimer()
+        {
+            timer.Elapsed -= new System.Timers.ElapsedEventHandler(AuthenticationCheckTimer);
+            timer.Enabled = false;
         }
 
         public async void AuthenticationCheckTimer(object sender, System.Timers.ElapsedEventArgs e)

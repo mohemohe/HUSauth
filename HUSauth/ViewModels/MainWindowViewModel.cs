@@ -66,7 +66,7 @@ namespace HUSauth.ViewModels
 
         public Network network;
 
-        public async void Initialize()
+        public void Initialize()
         {
             ChangeStatusBarString("ネットワーク認証を確認しています");
 
@@ -78,23 +78,6 @@ namespace HUSauth.ViewModels
                 Password = Settings.Password;
 
                 SystemEvents.PowerModeChanged += new PowerModeChangedEventHandler(SystemEvents_PowerModeChanged);
-            }
-
-            var IsConnected = false;
-
-            try
-            {
-                IsConnected = await Task.Run(() => Network.AuthenticationCheck());
-            }
-            catch { }
-
-            if (IsConnected)
-            {
-                ChangeStatusBarString("認証されています");
-            }
-            else
-            {
-                ChangeStatusBarString("認証されていません");
             }
 
             network = new Network();
