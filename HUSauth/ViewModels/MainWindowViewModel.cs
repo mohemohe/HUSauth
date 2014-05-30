@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using Livet.Behaviors.ControlBinding;
 using System.Security;
+using Microsoft.Win32;
 
 namespace HUSauth.ViewModels
 {
@@ -63,6 +64,8 @@ namespace HUSauth.ViewModels
          * 自動的にUIDispatcher上での通知に変換されます。変更通知に際してUIDispatcherを操作する必要はありません。
          */
 
+        public Network network;
+
         public async void Initialize()
         {
             ChangeStatusBarString("ネットワーク認証を確認しています");
@@ -73,6 +76,8 @@ namespace HUSauth.ViewModels
             {
                 ID = Settings.ID;
                 Password = Settings.Password;
+
+                SystemEvents.PowerModeChanged += new PowerModeChangedEventHandler(SystemEvents_PowerModeChanged);
             }
 
             var IsConnected = false;
@@ -90,6 +95,43 @@ namespace HUSauth.ViewModels
             else
             {
                 ChangeStatusBarString("認証されていません");
+            }
+
+            network = new Network();
+            var listener = new PropertyChangedEventListener(network);
+            listener.RegisterHandler((sender, e) => StatusBarUpdateHandler(sender, e));
+            this.CompositeDisposable.Add(listener);
+
+            network.StartAuthenticationCheckTimer();
+        }
+
+        private async void SystemEvents_PowerModeChanged(object sender, PowerModeChangedEventArgs e)
+        {
+            if (Network.IsAvailable() == true)
+            {
+                return;
+            }
+
+            ChangeStatusBarString("ネットワーク認証を確認しています");
+
+            var IsConnected = false;
+
+            try
+            {
+                IsConnected = await Task.Run(() => Network.IsAvailable());
+            }
+            catch
+            {
+                ChangeStatusBarString("ネットワークに接続されていません");
+            }
+
+            if (IsConnected)
+            {
+                ChangeStatusBarString("認証されています");
+            }
+            else
+            {
+                Login();
             }
         }
 
@@ -182,9 +224,16 @@ namespace HUSauth.ViewModels
             await Task.Run(() => Network.DoAuth(id, password));
 
             int i = 0;
-            while (i < 12)
+            while (i < 60)
             {
-                var IsConnected = await Task.Run(() => Network.AuthenticationCheck());
+                var IsConnected = false;
+
+                try
+                {
+                    IsConnected = await Task.Run(() => Network.AuthenticationCheck()); //TODO: あとでIsAvailableにする
+                }
+                catch { }
+
                 if (IsConnected)
                 {
                     ChangeStatusBarString("認証されています");
@@ -195,7 +244,8 @@ namespace HUSauth.ViewModels
                     ChangeStatusBarString("認証中...");
                 }
 
-                await Task.Run(() => Thread.Sleep(5000));
+                await Task.Run(() => Thread.Sleep(1000));
+                i++;
             }
 
             ChangeStatusBarString("認証に失敗しました");
@@ -227,6 +277,14 @@ namespace HUSauth.ViewModels
             StatusBarString = str;
         }
 
+        private void StatusBarUpdateHandler(object sender, PropertyChangedEventArgs e)
+        {
+            var worker = sender as Network;
+            if (e.PropertyName == "NetworkStatusString")
+            {
+                ChangeStatusBarString(worker.NetworkStatusString);
+            }
+        }
 
         #region ID変更通知プロパティ
         private string _ID;
@@ -262,7 +320,6 @@ namespace HUSauth.ViewModels
             }
         }
         #endregion
-
 
     }
 }
