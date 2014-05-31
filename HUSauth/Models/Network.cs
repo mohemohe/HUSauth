@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Livet;
 using System.Collections.Specialized;
-using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
-
-using Livet;
 
 namespace HUSauth.Models
 {
@@ -19,25 +13,27 @@ namespace HUSauth.Models
 
         public static bool IsAvailable()
         {
-            var ping = new Ping();
+            bool result = false;
 
-            try
+            using (var ping = new Ping())
             {
-                var reply = ping.Send("randgrid.ghippos.net", 1000);
+                try
+                {
+                    for (int i = 0; i < 3; i++) // タイマーが5秒ごとだから3秒くらいなら大丈夫やろ
+                    {
+                        var reply = ping.Send("randgrid.ghippos.net", 1000);
 
-                if (reply.Status == IPStatus.Success)
-                {
-                    return true;
+                        if (reply.Status == IPStatus.Success)
+                        {
+                            result = true;
+                            break;
+                        }
+                    }
                 }
-                else
-                {
-                    return false;
-                }
+                catch { }
             }
-            catch 
-            {
-                return false;
-            }
+
+            return result;
         }
 
         public static bool AuthenticationCheck()
@@ -60,11 +56,8 @@ namespace HUSauth.Models
 
         public static bool DoAuth(string ID, string Password)
         {
-            var wc = new WebClient();
-            wc.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; ASU2JS; rv:11.0) like Gecko | HUSauth");
-
             var nvc = new NameValueCollection();
-            
+
             nvc.Add("user_id", ID);
             nvc.Add("pass", Password);
             nvc.Add("url", "http://randgrid.ghippos.net/check.html");
@@ -73,30 +66,36 @@ namespace HUSauth.Models
 
             byte[] resData = null; // これ動くんですかね？
 
-            int i = 0;
-            while (i < 5) // 5回くらい試行しとけばいいかな
+            using (var wc = new WebClient())
             {
-                try
-                {
-                    resData = wc.UploadValues("http://gonet.localhost/cgi-bin/guide.cgi", nvc);
-                }
-                catch (Exception e)
-                {
-                    //TODO: いつかちゃんと処理書こうな？
+                wc.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; ASU2JS; rv:11.0) like Gecko | HUSauth");
 
-                    if (i < 5)
+                int i = 0;
+                while (i < 5) // 5回くらい試行しとけばいいかな
+                {
+                    try
                     {
-                        continue;
+                        resData = wc.UploadValues("http://gonet.localhost/cgi-bin/guide.cgi", nvc);
                     }
-                    else
+                    catch
                     {
-                        return false;
-                    }
-                }
+                        //TODO: いつかちゃんと処理書こうな？
 
-                break;
+                        i++;
+
+                        if (i < 5)
+                        {
+                            continue;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+
+                    break;
+                }
             }
-            wc.Dispose();
 
             var resText = "";
 
@@ -114,8 +113,8 @@ namespace HUSauth.Models
             return true;
         }
 
-
         #region NetworkStatusString変更通知プロパティ
+
         private string _NetworkStatusString;
 
         public string NetworkStatusString
@@ -123,15 +122,34 @@ namespace HUSauth.Models
             get
             { return _NetworkStatusString; }
             set
-            { 
+            {
                 if (_NetworkStatusString == value)
                     return;
                 _NetworkStatusString = value;
                 RaisePropertyChanged("NetworkStatusString");
             }
         }
-        #endregion
 
+        #endregion NetworkStatusString変更通知プロパティ
+
+        #region NetworkStatusBaloonString変更通知プロパティ
+
+        private string _NetworkStatusBaloonString = "";
+
+        public string NetworkStatusBaloonString
+        {
+            get
+            { return _NetworkStatusBaloonString; }
+            set
+            {
+                if (_NetworkStatusBaloonString == value)
+                    return;
+                _NetworkStatusBaloonString = value;
+                RaisePropertyChanged("NetworkStatusBaloonString");
+            }
+        }
+
+        #endregion NetworkStatusBaloonString変更通知プロパティ
 
         public void StartAuthenticationCheckTimer()
         {
@@ -146,19 +164,36 @@ namespace HUSauth.Models
             timer.Enabled = false;
         }
 
+        private bool? _isAvailable = null;
+
         public async void AuthenticationCheckTimer(object sender, System.Timers.ElapsedEventArgs e)
         {
             var isAvailable = false;
 
             isAvailable = await Task.Run(() => IsAvailable());
 
+            if (!_isAvailable.HasValue)
+            {
+                _isAvailable = (bool?)isAvailable;
+            }
+
             if (isAvailable == true)
             {
                 NetworkStatusString = "認証されています";
+
+                if (isAvailable != (bool)_isAvailable)
+                {
+                    NetworkStatusBaloonString = "認証しました";
+                }
             }
             else
             {
                 NetworkStatusString = "認証されていません";
+
+                if (isAvailable != (bool)_isAvailable)
+                {
+                    NetworkStatusBaloonString = "認証が解除されました";
+                }
             }
         }
     }

@@ -1,44 +1,36 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Linq;
-using System.Security;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-
-using Microsoft.Win32;
-
+﻿using HUSauth.Models;
 using Livet;
-using Livet.Behaviors.ControlBinding;
 using Livet.Commands;
 using Livet.EventListeners;
-using Livet.Messaging;
-using Livet.Messaging.IO;
 using Livet.Messaging.Windows;
-
-using HUSauth.Models;
+using Microsoft.Win32;
+using System;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Drawing;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Forms;
 
 namespace HUSauth.ViewModels
 {
     public class MainWindowViewModel : ViewModel
     {
-        /* コマンド、プロパティの定義にはそれぞれ 
-         * 
+        /* コマンド、プロパティの定義にはそれぞれ
+         *
          *  lvcom   : ViewModelCommand
          *  lvcomn  : ViewModelCommand(CanExecute無)
          *  llcom   : ListenerCommand(パラメータ有のコマンド)
          *  llcomn  : ListenerCommand(パラメータ有のコマンド・CanExecute無)
          *  lprop   : 変更通知プロパティ(.NET4.5ではlpropn)
-         *  
+         *
          * を使用してください。
-         * 
+         *
          * Modelが十分にリッチであるならコマンドにこだわる必要はありません。
          * View側のコードビハインドを使用しないMVVMパターンの実装を行う場合でも、ViewModelにメソッドを定義し、
          * LivetCallMethodActionなどから直接メソッドを呼び出してください。
-         * 
+         *
          * ViewModelのコマンドを呼び出せるLivetのすべてのビヘイビア・トリガー・アクションは
          * 同様に直接ViewModelのメソッドを呼び出し可能です。
          */
@@ -50,25 +42,32 @@ namespace HUSauth.ViewModels
         /* Modelからの変更通知などの各種イベントを受け取る場合は、PropertyChangedEventListenerや
          * CollectionChangedEventListenerを使うと便利です。各種ListenerはViewModelに定義されている
          * CompositeDisposableプロパティ(LivetCompositeDisposable型)に格納しておく事でイベント解放を容易に行えます。
-         * 
+         *
          * ReactiveExtensionsなどを併用する場合は、ReactiveExtensionsのCompositeDisposableを
          * ViewModelのCompositeDisposableプロパティに格納しておくのを推奨します。
-         * 
+         *
          * LivetのWindowテンプレートではViewのウィンドウが閉じる際にDataContextDisposeActionが動作するようになっており、
          * ViewModelのDisposeが呼ばれCompositeDisposableプロパティに格納されたすべてのIDisposable型のインスタンスが解放されます。
-         * 
+         *
          * ViewModelを使いまわしたい時などは、ViewからDataContextDisposeActionを取り除くか、発動のタイミングをずらす事で対応可能です。
          */
 
         /* UIDispatcherを操作する場合は、DispatcherHelperのメソッドを操作してください。
          * UIDispatcher自体はApp.xaml.csでインスタンスを確保してあります。
-         * 
+         *
          * LivetのViewModelではプロパティ変更通知(RaisePropertyChanged)やDispatcherCollectionを使ったコレクション変更通知は
          * 自動的にUIDispatcher上での通知に変換されます。変更通知に際してUIDispatcherを操作する必要はありません。
          */
 
         private static NotifyIcon notifyIcon;
         public Network network;
+
+        private Version _version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+
+        public string version
+        {
+            get { return _version.ToString(); }
+        }
 
         public void Initialize()
         {
@@ -105,10 +104,34 @@ namespace HUSauth.ViewModels
 
             network = new Network();
             var listener = new PropertyChangedEventListener(network);
-            listener.RegisterHandler((sender, e) => StatusBarUpdateHandler(sender, e));
+            listener.RegisterHandler((sender, e) => ViewUpdateHandler(sender, e));
             this.CompositeDisposable.Add(listener);
 
             network.StartAuthenticationCheckTimer();
+
+            ShowNotifyBaloon("認証状況の監視中", "右クリックメニューから終了できます");
+
+            UpdateCheck();
+        }
+
+        private async void UpdateCheck() // 本来ならここに書くべきではない気もするけどしょうがないじゃん
+        {
+            var uc = new UpdateChecker();
+            UpdateInfoPack uip = await Task.Run(() => uc.UpdateCheck(version));
+
+            if (uip.UpdateAvailable == true)
+            {
+                MessageBoxResult result = System.Windows.MessageBox.Show(
+                    "新しいバージョンの HUSauth が見つかりました。\n" + uip.CurrentVersion + " -> " + uip.NextVersion + "\n\n配布サイトを開きますか？",
+                    "アップデートの案内",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Information);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    Process.Start("http://ghippos.net/app/husauth.html");
+                }
+            }
         }
 
         private async void SystemEvents_PowerModeChanged(object sender, PowerModeChangedEventArgs e)
@@ -146,8 +169,8 @@ namespace HUSauth.ViewModels
             }
         }
 
-
         #region CloseCommand
+
         //lvcomn
         private ViewModelCommand _CloseCommand;
 
@@ -166,13 +189,14 @@ namespace HUSauth.ViewModels
         public void Close()
         {
             IsShowTaskBar = false;
-            Messenger.Raise(new WindowActionMessage(WindowAction.Minimize, "Close"));
+            //Messenger.Raise(new WindowActionMessage(WindowAction.Minimize, "Close"));
+            Opacity = 0.0; // Alt+Tabで表示されちゃうけどしょうがない
         }
-        #endregion
 
-
+        #endregion CloseCommand
 
         #region ExitCommand
+
         private ViewModelCommand _ExitCommand;
 
         public ViewModelCommand ExitCommand
@@ -201,11 +225,11 @@ namespace HUSauth.ViewModels
 
             Messenger.Raise(new WindowActionMessage(WindowAction.Close, "Close"));
         }
-        #endregion
 
-
+        #endregion ExitCommand
 
         #region MinimizeCommand
+
         private ViewModelCommand _MinimizeCommand;
 
         public ViewModelCommand MinimizeCommand
@@ -224,10 +248,11 @@ namespace HUSauth.ViewModels
         {
             Messenger.Raise(new WindowActionMessage(WindowAction.Minimize, "Minimize"));
         }
-        #endregion
 
+        #endregion MinimizeCommand
 
         #region RestoreCommand
+
         private ViewModelCommand _RestoreCommand;
 
         public ViewModelCommand RestoreCommand
@@ -245,12 +270,15 @@ namespace HUSauth.ViewModels
         public void Restore()
         {
             IsShowTaskBar = true;
-            Messenger.Raise(new WindowActionMessage(WindowAction.Active, "Active"));
+            //Messenger.Raise(new WindowActionMessage(WindowAction.Normal, "Normal"));
+            //Messenger.Raise(new WindowActionMessage(WindowAction.Active, "Active")); //アクティブにならないんですがそれは
+            Opacity = 1.0; // 妥協
         }
-        #endregion
 
+        #endregion RestoreCommand
 
         #region LoginCommand
+
         private ViewModelCommand _LoginCommand;
 
         public ViewModelCommand LoginCommand
@@ -270,15 +298,6 @@ namespace HUSauth.ViewModels
             var id = ID;
             var password = Password;
 
-            //if (Settings.ID == null || Settings.Password == null)
-            //{
-            //    //Settings.ID = ID;
-            //    id = ID;
-
-            //    //Settings.Password = Password;
-            //    password = Password;
-            //}
-
             await Task.Run(() => Network.DoAuth(id, password));
 
             int i = 0;
@@ -295,6 +314,8 @@ namespace HUSauth.ViewModels
                 if (IsConnected)
                 {
                     ChangeStatusBarString("認証されています");
+                    UpdateCheck();
+
                     return;
                 }
                 else
@@ -308,10 +329,11 @@ namespace HUSauth.ViewModels
 
             ChangeStatusBarString("認証に失敗しました");
         }
-        #endregion
 
+        #endregion LoginCommand
 
         #region StatusBarString変更通知プロパティ
+
         //lpropn
         private string _StatusBarString;
 
@@ -320,31 +342,36 @@ namespace HUSauth.ViewModels
             get
             { return _StatusBarString; }
             set
-            { 
+            {
                 if (_StatusBarString == value)
                     return;
                 _StatusBarString = value;
                 RaisePropertyChanged();
             }
         }
-        #endregion
+
+        #endregion StatusBarString変更通知プロパティ
 
         public void ChangeStatusBarString(string str)
         {
             StatusBarString = str;
         }
 
-        private void StatusBarUpdateHandler(object sender, PropertyChangedEventArgs e)
+        private void ViewUpdateHandler(object sender, PropertyChangedEventArgs e)
         {
             var worker = sender as Network;
             if (e.PropertyName == "NetworkStatusString")
             {
                 ChangeStatusBarString(worker.NetworkStatusString);
             }
+            if (e.PropertyName == "NetworkStatusBaloonString")
+            {
+                ShowNotifyBaloon("HUSauth", worker.NetworkStatusBaloonString);
+            }
         }
 
-
         #region IsShowTaskBar変更通知プロパティ
+
         private bool _IsShowTaskBar = true;
 
         public bool IsShowTaskBar
@@ -352,17 +379,37 @@ namespace HUSauth.ViewModels
             get
             { return _IsShowTaskBar; }
             set
-            { 
+            {
                 if (_IsShowTaskBar == value)
                     return;
                 _IsShowTaskBar = value;
                 RaisePropertyChanged();
             }
         }
-        #endregion
 
+        #endregion IsShowTaskBar変更通知プロパティ
+
+        #region Opacity変更通知プロパティ
+
+        private double _Opacity = 1.0;
+
+        public double Opacity
+        {
+            get
+            { return _Opacity; }
+            set
+            {
+                if (_Opacity == value)
+                    return;
+                _Opacity = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        #endregion Opacity変更通知プロパティ
 
         #region ID変更通知プロパティ
+
         private string _ID;
 
         public string ID
@@ -370,17 +417,18 @@ namespace HUSauth.ViewModels
             get
             { return _ID; }
             set
-            { 
+            {
                 if (_ID == value)
                     return;
                 _ID = value;
                 RaisePropertyChanged();
             }
         }
-        #endregion
 
+        #endregion ID変更通知プロパティ
 
         #region Password変更通知プロパティ
+
         private string _Password;
 
         public string Password
@@ -388,17 +436,18 @@ namespace HUSauth.ViewModels
             get
             { return _Password; }
             set
-            { 
+            {
                 if (_Password == value)
                     return;
                 _Password = value;
                 RaisePropertyChanged();
             }
         }
-        #endregion
 
+        #endregion Password変更通知プロパティ
 
         #region public static void ShowNotifyBaloon()
+
         public static void ShowNotifyBaloon(string title, string body)
         {
             if (notifyIcon.Visible == true && notifyIcon.Icon != null)
@@ -432,6 +481,7 @@ namespace HUSauth.ViewModels
                 notifyIcon.ShowBalloonTip(timeout);
             }
         }
-        #endregion
+
+        #endregion public static void ShowNotifyBaloon()
     }
 }

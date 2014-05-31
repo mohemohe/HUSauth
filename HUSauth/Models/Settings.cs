@@ -1,12 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Security;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Serialization;
 
 namespace HUSauth.Models
@@ -23,16 +17,18 @@ namespace HUSauth.Models
     public class _Settings
     {
         public static byte[] Hash { get; set; }
+
         public static string ID { get; set; }
+
         public static string EncryptedPassword { get; set; }
     }
 
-    class Settings
+    internal class Settings
     {
         #region Accessor
 
         public static byte[] Hash
-        { 
+        {
             get { return _Settings.Hash; }
             set { _Settings.Hash = value; }
         }
@@ -66,7 +62,7 @@ namespace HUSauth.Models
             }
         }
 
-        #endregion
+        #endregion Accessor
 
         private static string FileName = "Settings.xml";
 
@@ -103,10 +99,11 @@ namespace HUSauth.Models
         {
             var xmls = new XMLSettings();
             var xs = new XmlSerializer(typeof(XMLSettings));
-            var fs = new FileStream(FileName, FileMode.Open);
-
-            xmls = (XMLSettings)xs.Deserialize(fs);
-            fs.Close();
+            using (var fs = new FileStream(FileName, FileMode.Open))
+            {
+                xmls = (XMLSettings)xs.Deserialize(fs);
+                fs.Close();
+            }
 
             _Settings.Hash = xmls.Hash;
             _Settings.ID = xmls.ID;
@@ -121,9 +118,10 @@ namespace HUSauth.Models
             xmls.EncryptedPassword = _Settings.EncryptedPassword;
 
             var xs = new XmlSerializer(typeof(XMLSettings));
-            var fs = new FileStream(FileName, FileMode.OpenOrCreate, FileAccess.Write);
-
-            xs.Serialize(fs, xmls);
+            using (var fs = new FileStream(FileName, FileMode.OpenOrCreate, FileAccess.Write))
+            {
+                xs.Serialize(fs, xmls);
+            }
         }
     }
 }
