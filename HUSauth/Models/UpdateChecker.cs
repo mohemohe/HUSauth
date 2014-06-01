@@ -66,6 +66,11 @@ namespace HUSauth.Models
 
         private int[] VersionSplitter(string version)
         {
+            if (version == "")
+            {
+                return new int[4] { 0, 0, 0, 0 };
+            }
+
             var result = new int[3];
             var _result = new string[4];
 
