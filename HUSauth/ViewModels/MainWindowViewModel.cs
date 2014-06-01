@@ -141,6 +141,8 @@ namespace HUSauth.ViewModels
                 return;
             }
 
+            network.StopAuthenticationCheckTimer();
+
             ChangeStatusBarString("ネットワーク認証を確認しています");
 
             var IsConnected = false;
@@ -154,7 +156,7 @@ namespace HUSauth.ViewModels
                 ChangeStatusBarString("ネットワークに接続されていません");
             }
 
-            if (IsConnected)
+            if (IsConnected == true)
             {
                 ChangeStatusBarString("認証されています");
             }
@@ -167,6 +169,8 @@ namespace HUSauth.ViewModels
                     ShowNotifyBaloon("自動認証成功", "ネットワークの自動認証に成功しました");
                 }
             }
+
+            network.StartAuthenticationCheckTimer();
         }
 
         #region CloseCommand
