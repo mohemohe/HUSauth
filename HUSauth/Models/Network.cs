@@ -164,7 +164,7 @@ namespace HUSauth.Models
             timer.Enabled = false;
         }
 
-        private bool? _isAvailable = null;
+        bool isStarted = false;
 
         public async void AuthenticationCheckTimer(object sender, System.Timers.ElapsedEventArgs e)
         {
@@ -172,29 +172,32 @@ namespace HUSauth.Models
 
             isAvailable = await Task.Run(() => IsAvailable());
 
-            if (!_isAvailable.HasValue)
-            {
-                _isAvailable = (bool?)isAvailable;
-            }
-
             if (isAvailable == true)
             {
                 NetworkStatusString = "認証されています";
 
-                if (isAvailable != (bool)_isAvailable)
+                if (isStarted != true) // 初回はバルーンを表示しない
                 {
-                    NetworkStatusBaloonString = "認証しました";
+                    isStarted = true;
+                    return;
                 }
+
+                NetworkStatusBaloonString = "認証しました";
             }
             else
             {
                 NetworkStatusString = "認証されていません";
 
-                if (isAvailable != (bool)_isAvailable)
+                if (isStarted != true)
                 {
-                    NetworkStatusBaloonString = "認証が解除されました";
+                    isStarted = true;
+                    return;
                 }
+                    
+                NetworkStatusBaloonString = "認証が解除されました";
             }
+
+            
         }
     }
 }
