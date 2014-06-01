@@ -1,45 +1,39 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-
-using Livet;
-using HUSauth.Views;
-using HUSauth.ViewModels;
-using System.Windows.Forms;
+﻿using Livet;
 using System.Collections.Specialized;
 using System.Net;
 using System.Net.NetworkInformation;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace HUSauth.Models
 {
     public class Network : NotificationObject
     {
-        private static System.Timers.Timer timer;
+        private System.Timers.Timer timer = new System.Timers.Timer();
 
         public static bool IsAvailable()
         {
-            var ping = new Ping();
+            bool result = false;
 
-            try
+            using (var ping = new Ping())
             {
-                var reply = ping.Send("randgrid.ghippos.net", 1000);
+                try
+                {
+                    for (int i = 0; i < 3; i++) // タイマーが5秒ごとだから3秒くらいなら大丈夫やろ
+                    {
+                        var reply = ping.Send("randgrid.ghippos.net", 1000);
 
-                if (reply.Status == IPStatus.Success)
-                {
-                    return true;
+                        if (reply.Status == IPStatus.Success)
+                        {
+                            result = true;
+                            break;
+                        }
+                    }
                 }
-                else
-                {
-                    return false;
-                }
+                catch { }
             }
-            catch 
-            {
-                return false;
-            }
+
+            return result;
         }
 
         public static bool AuthenticationCheck()
@@ -62,29 +56,46 @@ namespace HUSauth.Models
 
         public static bool DoAuth(string ID, string Password)
         {
-            var wc = new WebClient();
-            wc.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; ASU2JS; rv:11.0) like Gecko | HUSauth");
-
             var nvc = new NameValueCollection();
-            
+
             nvc.Add("user_id", ID);
             nvc.Add("pass", Password);
             nvc.Add("url", "http://randgrid.ghippos.net/check.html");
             nvc.Add("lang", "ja");
             nvc.Add("event", "1");
 
-            byte[] resData;
-            try
+            byte[] resData = null; // これ動くんですかね？
+
+            using (var wc = new WebClient())
             {
-                resData = wc.UploadValues("http://gonet.localhost/cgi-bin/guide.cgi", nvc);
+                wc.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; ASU2JS; rv:11.0) like Gecko | HUSauth");
+
+                int i = 0;
+                while (i < 5) // 5回くらい試行しとけばいいかな
+                {
+                    try
+                    {
+                        resData = wc.UploadValues("http://gonet.localhost/cgi-bin/guide.cgi", nvc);
+                    }
+                    catch
+                    {
+                        //TODO: いつかちゃんと処理書こうな？
+
+                        i++;
+
+                        if (i < 5)
+                        {
+                            continue;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+
+                    break;
+                }
             }
-            catch (Exception e)
-            {
-                //TODO: いつかちゃんと処理書こうな？
-                throw e;
-            }
-            
-            wc.Dispose();
 
             var resText = "";
 
@@ -102,8 +113,8 @@ namespace HUSauth.Models
             return true;
         }
 
-
         #region NetworkStatusString変更通知プロパティ
+
         private string _NetworkStatusString;
 
         public string NetworkStatusString
@@ -111,23 +122,49 @@ namespace HUSauth.Models
             get
             { return _NetworkStatusString; }
             set
-            { 
+            {
                 if (_NetworkStatusString == value)
                     return;
                 _NetworkStatusString = value;
                 RaisePropertyChanged("NetworkStatusString");
             }
         }
-        #endregion
 
+        #endregion NetworkStatusString変更通知プロパティ
+
+        #region NetworkStatusBaloonString変更通知プロパティ
+
+        private string _NetworkStatusBaloonString = "";
+
+        public string NetworkStatusBaloonString
+        {
+            get
+            { return _NetworkStatusBaloonString; }
+            set
+            {
+                if (_NetworkStatusBaloonString == value)
+                    return;
+                _NetworkStatusBaloonString = value;
+                RaisePropertyChanged("NetworkStatusBaloonString");
+            }
+        }
+
+        #endregion NetworkStatusBaloonString変更通知プロパティ
 
         public void StartAuthenticationCheckTimer()
         {
-            timer = new System.Timers.Timer();
-                timer.Elapsed += new System.Timers.ElapsedEventHandler(AuthenticationCheckTimer);
-                timer.Interval = 5000;
-                timer.Enabled = true;
+            timer.Elapsed += new System.Timers.ElapsedEventHandler(AuthenticationCheckTimer);
+            timer.Interval = 5000;
+            timer.Enabled = true;
         }
+
+        public void StopAuthenticationCheckTimer()
+        {
+            timer.Elapsed -= new System.Timers.ElapsedEventHandler(AuthenticationCheckTimer);
+            timer.Enabled = false;
+        }
+
+        bool isStarted = false;
 
         public async void AuthenticationCheckTimer(object sender, System.Timers.ElapsedEventArgs e)
         {
@@ -138,11 +175,29 @@ namespace HUSauth.Models
             if (isAvailable == true)
             {
                 NetworkStatusString = "認証されています";
+
+                if (isStarted != true) // 初回はバルーンを表示しない
+                {
+                    isStarted = true;
+                    return;
+                }
+
+                NetworkStatusBaloonString = "認証しました";
             }
             else
             {
                 NetworkStatusString = "認証されていません";
+
+                if (isStarted != true)
+                {
+                    isStarted = true;
+                    return;
+                }
+                    
+                NetworkStatusBaloonString = "認証が解除されました";
             }
+
+            
         }
     }
 }

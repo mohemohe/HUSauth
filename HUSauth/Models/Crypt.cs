@@ -33,40 +33,43 @@ namespace HUSauth.Models
 
         public static string Encrypt(string str, byte[] seed)
         {
-            var rm = new RijndaelManaged();
-            rm.BlockSize = 256;
-            rm.KeySize = 256;
-            rm.IV = seed;
-            rm.Key = CreateSeed(BitConverter.ToString(seed).Replace("-", ""));
-            rm.Mode = CipherMode.CBC;
-            rm.Padding = PaddingMode.PKCS7;
-
-            byte[] baseStr = Encoding.Unicode.GetBytes(str);
-
-            using (var encrypt = rm.CreateEncryptor())
+            using (var rm = new RijndaelManaged())
             {
-                byte[] dest = encrypt.TransformFinalBlock(baseStr, 0, baseStr.Length);
+                rm.BlockSize = 256;
+                rm.KeySize = 256;
+                rm.IV = seed;
+                rm.Key = CreateSeed(BitConverter.ToString(seed).Replace("-", ""));
+                rm.Mode = CipherMode.CBC;
+                rm.Padding = PaddingMode.PKCS7;
 
-                return Convert.ToBase64String(dest);
+                byte[] baseStr = Encoding.Unicode.GetBytes(str);
+
+                using (var encrypt = rm.CreateEncryptor())
+                {
+                    byte[] dest = encrypt.TransformFinalBlock(baseStr, 0, baseStr.Length);
+                    return Convert.ToBase64String(dest);
+                }
             }
         }
 
         public static string Decrypt(string str, byte[] seed)
         {
-            var rm = new RijndaelManaged();
-            rm.BlockSize = 256;
-            rm.KeySize = 256;
-            rm.IV = seed;
-            rm.Key = CreateSeed(BitConverter.ToString(seed).Replace("-", ""));
-            rm.Mode = CipherMode.CBC;
-            rm.Padding = PaddingMode.PKCS7;
-
-            byte[] baseStr = System.Convert.FromBase64String(str);
-
-            using (var decrypt = rm.CreateDecryptor())
+            using (var rm = new RijndaelManaged())
             {
-                byte[] dest = decrypt.TransformFinalBlock(baseStr, 0, baseStr.Length);
-                return Encoding.Unicode.GetString(dest);
+                rm.BlockSize = 256;
+                rm.KeySize = 256;
+                rm.IV = seed;
+                rm.Key = CreateSeed(BitConverter.ToString(seed).Replace("-", ""));
+                rm.Mode = CipherMode.CBC;
+                rm.Padding = PaddingMode.PKCS7;
+
+                byte[] baseStr = System.Convert.FromBase64String(str);
+
+                using (var decrypt = rm.CreateDecryptor())
+                {
+                    byte[] dest = decrypt.TransformFinalBlock(baseStr, 0, baseStr.Length);
+                    return Encoding.Unicode.GetString(dest);
+                }
             }
         }
     }
