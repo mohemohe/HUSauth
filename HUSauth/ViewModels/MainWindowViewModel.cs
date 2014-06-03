@@ -109,8 +109,6 @@ namespace HUSauth.ViewModels
 
             network.StartAuthenticationCheckTimer();
 
-            ShowNotifyBaloon("認証状況の監視中", "右クリックメニューから終了できます");
-
             UpdateCheck();
         }
 
@@ -195,6 +193,8 @@ namespace HUSauth.ViewModels
             IsShowTaskBar = false;
             //Messenger.Raise(new WindowActionMessage(WindowAction.Minimize, "Close"));
             Opacity = 0.0; // Alt+Tabで表示されちゃうけどしょうがない
+
+            ShowNotifyBaloon("認証状況の監視中", "右クリックメニューから終了できます");
         }
 
         #endregion CloseCommand
