@@ -309,6 +309,8 @@ namespace HUSauth.ViewModels
             {
                 var IsConnected = false;
 
+                ChangeStatusBarString("認証中...");
+
                 try
                 {
                     IsConnected = await Task.Run(() => Network.IsAvailable());
@@ -321,10 +323,6 @@ namespace HUSauth.ViewModels
                     UpdateCheck();
 
                     return;
-                }
-                else
-                {
-                    ChangeStatusBarString("認証中...");
                 }
 
                 await Task.Run(() => Thread.Sleep(1000));
