@@ -161,6 +161,7 @@ namespace HUSauth.ViewModels
             }
             else
             {
+                await Task.Run(() => Thread.Sleep(10000)); //TODO: 割り当たっているIPアドレスを確認するようにする
                 Login();
 
                 if (IsShowTaskBar == false)
