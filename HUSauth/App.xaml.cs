@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows;
@@ -43,14 +44,60 @@ namespace HUSauth
         //集約エラーハンドラ
         private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            //TODO:ロギング処理など
-            MessageBox.Show(
-                "不明なエラーが発生しました。アプリケーションを終了します。",
-                "エラー",
-                MessageBoxButton.OK,
-                MessageBoxImage.Error);
+            string messeage = "未知のエラーが発生しました。アプリケーションを終了します。\n\n";
+            string extMesseage = null;
 
-            Environment.Exit(1);
+            try
+            {
+                Exception ex = (Exception)e.ExceptionObject;
+
+                messeage = "未知のエラーが発生しました。アプリケーションを終了します。\n\nエラー内容:\n";
+
+                try
+                {
+                    var location = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+                    using(var sw = new StreamWriter(location + @"\log.txt"))
+                    {
+                        sw.WriteLine("Messeage:");
+                        sw.WriteLine(ex.Message);
+                        sw.WriteLine("");
+                        sw.WriteLine("InnerException:");
+                        sw.WriteLine(ex.InnerException);
+                        sw.WriteLine("");
+                        sw.WriteLine("Source:");
+                        sw.WriteLine(ex.Source);
+                        sw.WriteLine("");
+                        sw.WriteLine("TargetSite:");
+                        sw.WriteLine(ex.TargetSite);
+                        sw.WriteLine("");
+                        sw.WriteLine("");
+                        sw.WriteLine("StackTrace:");
+                        sw.WriteLine(ex.StackTrace);
+                        sw.Close();
+                    }
+
+                    extMesseage = "\n\n\n実行フォルダに log.txt を生成しました。";
+                }
+                catch { }
+
+                MessageBox.Show(
+                    messeage + ex.Message + extMesseage,
+                    "エラー",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
+            catch
+            {
+                MessageBox.Show(
+                    messeage + "不明なエラー",
+                    "エラー",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
+            finally
+            {
+                Environment.Exit(1);
+            }
         }
     }
 }
