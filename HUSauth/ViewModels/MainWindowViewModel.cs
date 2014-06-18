@@ -121,7 +121,7 @@ namespace HUSauth.ViewModels
             {
                 MessageBoxResult result = System.Windows.MessageBox.Show(
                     "新しいバージョンの HUSauth が見つかりました。\n" + uip.CurrentVersion + " -> " + uip.NextVersion + "\n\n配布サイトを開きますか？",
-                    "アップデートの案内",
+                    "アップデートのお知らせ",
                     MessageBoxButton.YesNo,
                     MessageBoxImage.Information);
 
