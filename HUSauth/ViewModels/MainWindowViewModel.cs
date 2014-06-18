@@ -139,6 +139,7 @@ namespace HUSauth.ViewModels
                 return;
             }
 
+            network.isStarted = false;
             network.StopAuthenticationCheckTimer();
 
             ChangeStatusBarString("ネットワーク認証を確認しています");

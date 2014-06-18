@@ -144,6 +144,12 @@ namespace HUSauth.Models
             {
                 if (_NetworkStatusBaloonString == value)
                     return;
+                if (isStarted != true) // 初回はバルーンを表示しない
+                {
+                    isStarted = true;
+                    return;
+                }
+
                 _NetworkStatusBaloonString = value;
                 RaisePropertyChanged("NetworkStatusBaloonString");
             }
@@ -164,7 +170,7 @@ namespace HUSauth.Models
             timer.Enabled = false;
         }
 
-        bool isStarted = false;
+        public bool isStarted = false;
 
         public async void AuthenticationCheckTimer(object sender, System.Timers.ElapsedEventArgs e)
         {
@@ -175,25 +181,11 @@ namespace HUSauth.Models
             if (isAvailable == true)
             {
                 NetworkStatusString = "認証されています";
-
-                if (isStarted != true) // 初回はバルーンを表示しない
-                {
-                    isStarted = true;
-                    return;
-                }
-
                 NetworkStatusBaloonString = "認証しました";
             }
             else
             {
                 NetworkStatusString = "認証されていません";
-
-                if (isStarted != true)
-                {
-                    isStarted = true;
-                    return;
-                }
-                    
                 NetworkStatusBaloonString = "認証が解除されました";
             }
 
