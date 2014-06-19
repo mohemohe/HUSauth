@@ -70,12 +70,22 @@ namespace HUSauth.Models
             {
                 wc.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; ASU2JS; rv:11.0) like Gecko | HUSauth");
 
+                string authServer;
+                if (Settings.AnotherAuthServer != "")
+                {
+                    authServer = Settings.AnotherAuthServer;
+                }
+                else
+                {
+                    authServer = "http://gonet.localhost/cgi-bin/guide.cgi";
+                }
+
                 int i = 0;
                 while (i < 5) // 5回くらい試行しとけばいいかな
                 {
                     try
                     {
-                        resData = wc.UploadValues("http://gonet.localhost/cgi-bin/guide.cgi", nvc);
+                        resData = wc.UploadValues(authServer, nvc);
                     }
                     catch
                     {
