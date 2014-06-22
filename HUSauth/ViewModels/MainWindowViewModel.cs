@@ -323,8 +323,14 @@ namespace HUSauth.ViewModels
 
             await Task.Run(() =>
             {
-                for (int i = 0; i < 60; i++)
+                for (int i = 0; i <= 60; i++)
                 {
+                    if (i == 60)
+                    {
+                        ShowNotifyBaloon("自動認証失敗", "ネットワークに接続されていません");
+                        return;
+                    }
+
                     if (Network.CheckIPAddress() == true)
                     {
                         break;
@@ -332,9 +338,6 @@ namespace HUSauth.ViewModels
 
                     Thread.Sleep(1000);
                 }
-
-                ChangeStatusBarString("ネットワークに接続されていません");
-                return;
             });
 
             await Task.Run(() => Network.DoAuth(id, password));
