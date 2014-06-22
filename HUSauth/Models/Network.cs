@@ -11,6 +11,29 @@ namespace HUSauth.Models
     {
         private System.Timers.Timer timer = new System.Timers.Timer();
 
+        public static bool CheckIPAddress()
+        {
+            var ani = NetworkInterface.GetAllNetworkInterfaces();
+            foreach (var ni in ani)
+            {
+                var n = ni.GetIPProperties();
+                var ua = n.UnicastAddresses;
+                foreach (var ip in ua)
+                {
+                    var address = ip.Address;
+                    if (address.ToString() != Settings.ExcludeIP1 || address.ToString() != Settings.ExcludeIP2 || address.ToString() != Settings.ExcludeIP3)
+                    {
+                        if (address.ToString().Contains("192.168.") || address.ToString().Contains("172.16."))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
         public static bool IsAvailable()
         {
             bool result = false;
