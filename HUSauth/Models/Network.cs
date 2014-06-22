@@ -16,13 +16,14 @@ namespace HUSauth.Models
             var ani = NetworkInterface.GetAllNetworkInterfaces();
             foreach (var ni in ani)
             {
-                var n = ni.GetIPProperties();
-                var ua = n.UnicastAddresses;
+                var ipp = ni.GetIPProperties();
+                var ua = ipp.UnicastAddresses;
                 foreach (var ip in ua)
                 {
                     var address = ip.Address;
                     if (address.ToString() != Settings.ExcludeIP1 || address.ToString() != Settings.ExcludeIP2 || address.ToString() != Settings.ExcludeIP3)
                     {
+                        // 169.254/16 にならなければ何でもいい気がする
                         if (address.ToString().Contains("192.168.") || address.ToString().Contains("172.16."))
                         {
                             return true;
@@ -36,7 +37,7 @@ namespace HUSauth.Models
 
         public static bool IsAvailable()
         {
-            bool result = false;
+            var result = false;
 
             using (var ping = new Ping())
             {
