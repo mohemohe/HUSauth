@@ -30,4 +30,4 @@ PullReqお待ちしております
 ### ADDITIONAL LICENSE
 
 "appbar.information.circle.png" and "appbar.settings.png" are CC BY-ND 3.0 .  
-more infomation visit [https://github.com/Templarian/WindowsIcons/blob/master/WindowsPhone/license.txt#L7](https://github.com/Templarian/WindowsIcons/blob/master/WindowsPhone/license.txt#L7) .
+more infomation visit [https://github.com/Templarian/WindowsIcons/blob/master/WindowsPhone/license.txt](https://github.com/Templarian/WindowsIcons/blob/master/WindowsPhone/license.txt) .
