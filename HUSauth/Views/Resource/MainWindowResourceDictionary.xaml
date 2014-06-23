@@ -130,5 +130,48 @@
             <ContentPresenter TextBlock.Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
         </Border>
     </ControlTemplate>
+    <ControlTemplate x:Key="Button" TargetType="{x:Type Button}">
+        <Border x:Name="border" Background="#00FFFFFF">
+            <VisualStateManager.VisualStateGroups>
+                <VisualStateGroup x:Name="CommonStates">
+                    <VisualState x:Name="Normal">
+                        <Storyboard>
+                            <ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(Panel.Background).(SolidColorBrush.Color)" Storyboard.TargetName="border">
+                                <EasingColorKeyFrame KeyTime="0:0:0.2" Value="#00FFFFFF">
+                                    <EasingColorKeyFrame.EasingFunction>
+                                        <CubicEase EasingMode="EaseInOut" />
+                                    </EasingColorKeyFrame.EasingFunction>
+                                </EasingColorKeyFrame>
+                            </ColorAnimationUsingKeyFrames>
+                        </Storyboard>
+                    </VisualState>
+                    <VisualState x:Name="MouseOver">
+                        <Storyboard>
+                            <ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(Panel.Background).(SolidColorBrush.Color)" Storyboard.TargetName="border">
+                                <EasingColorKeyFrame KeyTime="0:0:0.2" Value="#66FFFFFF">
+                                    <EasingColorKeyFrame.EasingFunction>
+                                        <CubicEase EasingMode="EaseInOut" />
+                                    </EasingColorKeyFrame.EasingFunction>
+                                </EasingColorKeyFrame>
+                            </ColorAnimationUsingKeyFrames>
+                        </Storyboard>
+                    </VisualState>
+                    <VisualState x:Name="Pressed">
+                        <Storyboard>
+                            <ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(Panel.Background).(SolidColorBrush.Color)" Storyboard.TargetName="border">
+                                <EasingColorKeyFrame KeyTime="0:0:0.2" Value="#33FFFFFF">
+                                    <EasingColorKeyFrame.EasingFunction>
+                                        <CubicEase EasingMode="EaseInOut" />
+                                    </EasingColorKeyFrame.EasingFunction>
+                                </EasingColorKeyFrame>
+                            </ColorAnimationUsingKeyFrames>
+                        </Storyboard>
+                    </VisualState>
+                    <VisualState x:Name="Disabled" />
+                </VisualStateGroup>
+            </VisualStateManager.VisualStateGroups>
+            <ContentPresenter TextBlock.Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </Border>
+    </ControlTemplate>
     <!-- リソース ディクショナリのエントリはここで定義します。-->
 </ResourceDictionary>

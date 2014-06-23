@@ -161,7 +161,7 @@ namespace HUSauth.Models
             xmls.AnotherAuthServer = _Settings.AnotherAuthServer;
 
             var xs = new XmlSerializer(typeof(XMLSettings));
-            using (var fs = new FileStream(FileName, FileMode.OpenOrCreate, FileAccess.Write))
+            using (var fs = new FileStream(FileName, FileMode.Create, FileAccess.Write))
             {
                 xs.Serialize(fs, xmls);
             }

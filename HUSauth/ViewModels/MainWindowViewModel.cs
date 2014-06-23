@@ -372,6 +372,51 @@ namespace HUSauth.ViewModels
         }
 
         #endregion LoginCommand
+        
+        #region ConfigCommand
+        private ViewModelCommand _ConfigCommand;
+
+        public ViewModelCommand ConfigCommand
+        {
+            get
+            {
+                if (_ConfigCommand == null)
+                {
+                    _ConfigCommand = new ViewModelCommand(Config);
+                }
+                return _ConfigCommand;
+            }
+        }
+
+        public void Config()
+        {
+            var cw = new Views.ConfigWindow();
+            cw.ShowDialog();
+        }
+        #endregion
+
+
+        #region AboutCommand
+        private ViewModelCommand _AboutCommand;
+
+        public ViewModelCommand AboutCommand
+        {
+            get
+            {
+                if (_AboutCommand == null)
+                {
+                    _AboutCommand = new ViewModelCommand(About);
+                }
+                return _AboutCommand;
+            }
+        }
+
+        public void About()
+        {
+            //TODO: About this application
+        }
+        #endregion
+
 
         #region StatusBarString変更通知プロパティ
 
