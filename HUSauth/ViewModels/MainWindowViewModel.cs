@@ -72,7 +72,7 @@ namespace HUSauth.ViewModels
         public void Initialize()
         {
             ChangeStatusBarString("ネットワーク認証を確認しています");
-
+            
             Settings.Initialize();
 
             if (Settings.ID != null || Settings.Password != "")
@@ -109,8 +109,6 @@ namespace HUSauth.ViewModels
 
             network.StartAuthenticationCheckTimer();
 
-            ShowNotifyBaloon("認証状況の監視中", "右クリックメニューから終了できます");
-
             UpdateCheck();
         }
 
@@ -123,7 +121,7 @@ namespace HUSauth.ViewModels
             {
                 MessageBoxResult result = System.Windows.MessageBox.Show(
                     "新しいバージョンの HUSauth が見つかりました。\n" + uip.CurrentVersion + " -> " + uip.NextVersion + "\n\n配布サイトを開きますか？",
-                    "アップデートの案内",
+                    "アップデートのお知らせ",
                     MessageBoxButton.YesNo,
                     MessageBoxImage.Information);
 
@@ -141,6 +139,7 @@ namespace HUSauth.ViewModels
                 return;
             }
 
+            network.isStarted = false;
             network.StopAuthenticationCheckTimer();
 
             ChangeStatusBarString("ネットワーク認証を確認しています");
@@ -162,6 +161,24 @@ namespace HUSauth.ViewModels
             }
             else
             {
+                await Task.Run(() => {
+                    for (int i = 0; i <= 60; i++)
+                    {
+                        if (i == 60)
+                        {
+                            ShowNotifyBaloon("自動認証失敗", "ネットワークに接続されていません");
+                            return;
+                        }
+
+                        if (Network.CheckIPAddress() == true)
+                        {
+                            break;
+                        }
+
+                        Thread.Sleep(1000);
+                    }
+                });
+                
                 Login();
 
                 if (IsShowTaskBar == false)
@@ -195,6 +212,8 @@ namespace HUSauth.ViewModels
             IsShowTaskBar = false;
             //Messenger.Raise(new WindowActionMessage(WindowAction.Minimize, "Close"));
             Opacity = 0.0; // Alt+Tabで表示されちゃうけどしょうがない
+
+            ShowNotifyBaloon("認証状況の監視中", "右クリックメニューから終了できます");
         }
 
         #endregion CloseCommand
@@ -302,12 +321,34 @@ namespace HUSauth.ViewModels
             var id = ID;
             var password = Password;
 
+            await Task.Run(() =>
+            {
+                for (int i = 0; i <= 60; i++)
+                {
+                    if (i == 60)
+                    {
+                        ShowNotifyBaloon("自動認証失敗", "ネットワークに接続されていません");
+                        return;
+                    }
+
+                    if (Network.CheckIPAddress() == true)
+                    {
+                        break;
+                    }
+
+                    Thread.Sleep(1000);
+                }
+            });
+
             await Task.Run(() => Network.DoAuth(id, password));
 
-            int i = 0;
-            while (i < 60)
+            int j = 0;
+            while (j < 60)
             {
                 var IsConnected = false;
+
+                ChangeStatusBarString("認証中...");
+
 
                 try
                 {
@@ -322,13 +363,9 @@ namespace HUSauth.ViewModels
 
                     return;
                 }
-                else
-                {
-                    ChangeStatusBarString("認証中...");
-                }
 
                 await Task.Run(() => Thread.Sleep(1000));
-                i++;
+                j++;
             }
 
             ChangeStatusBarString("認証に失敗しました");

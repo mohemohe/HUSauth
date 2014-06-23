@@ -11,9 +11,33 @@ namespace HUSauth.Models
     {
         private System.Timers.Timer timer = new System.Timers.Timer();
 
+        public static bool CheckIPAddress()
+        {
+            var ani = NetworkInterface.GetAllNetworkInterfaces();
+            foreach (var ni in ani)
+            {
+                var ipp = ni.GetIPProperties();
+                var ua = ipp.UnicastAddresses;
+                foreach (var ip in ua)
+                {
+                    var address = ip.Address;
+                    if (address.ToString() != Settings.ExcludeIP1 || address.ToString() != Settings.ExcludeIP2 || address.ToString() != Settings.ExcludeIP3)
+                    {
+                        // 169.254/16 にならなければ何でもいい気がする
+                        if (address.ToString().Contains("192.168.") || address.ToString().Contains("172.16."))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
         public static bool IsAvailable()
         {
-            bool result = false;
+            var result = false;
 
             using (var ping = new Ping())
             {
@@ -70,12 +94,22 @@ namespace HUSauth.Models
             {
                 wc.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; ASU2JS; rv:11.0) like Gecko | HUSauth");
 
+                string authServer;
+                if (Settings.AnotherAuthServer != "")
+                {
+                    authServer = Settings.AnotherAuthServer;
+                }
+                else
+                {
+                    authServer = "http://gonet.localhost/cgi-bin/guide.cgi";
+                }
+
                 int i = 0;
                 while (i < 5) // 5回くらい試行しとけばいいかな
                 {
                     try
                     {
-                        resData = wc.UploadValues("http://gonet.localhost/cgi-bin/guide.cgi", nvc);
+                        resData = wc.UploadValues(authServer, nvc);
                     }
                     catch
                     {
@@ -144,6 +178,12 @@ namespace HUSauth.Models
             {
                 if (_NetworkStatusBaloonString == value)
                     return;
+                if (isStarted != true) // 初回はバルーンを表示しない
+                {
+                    isStarted = true;
+                    return;
+                }
+
                 _NetworkStatusBaloonString = value;
                 RaisePropertyChanged("NetworkStatusBaloonString");
             }
@@ -164,7 +204,7 @@ namespace HUSauth.Models
             timer.Enabled = false;
         }
 
-        bool isStarted = false;
+        public bool isStarted = false;
 
         public async void AuthenticationCheckTimer(object sender, System.Timers.ElapsedEventArgs e)
         {
@@ -175,25 +215,11 @@ namespace HUSauth.Models
             if (isAvailable == true)
             {
                 NetworkStatusString = "認証されています";
-
-                if (isStarted != true) // 初回はバルーンを表示しない
-                {
-                    isStarted = true;
-                    return;
-                }
-
                 NetworkStatusBaloonString = "認証しました";
             }
             else
             {
                 NetworkStatusString = "認証されていません";
-
-                if (isStarted != true)
-                {
-                    isStarted = true;
-                    return;
-                }
-                    
                 NetworkStatusBaloonString = "認証が解除されました";
             }
 

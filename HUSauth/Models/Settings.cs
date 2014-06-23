@@ -12,15 +12,26 @@ namespace HUSauth.Models
 
         //TODO: SecureStringにしたほうがいいだろうけど全部変えるとどうやってバインドすればいいのか分からぬ
         public string EncryptedPassword;
+
+        public string ExcludeIP1 = "";
+        public string ExcludeIP2 = "";
+        public string ExcludeIP3 = "";
+
+        public string AnotherAuthServer = "";
     }
 
     public class _Settings
     {
         public static byte[] Hash { get; set; }
-
         public static string ID { get; set; }
 
         public static string EncryptedPassword { get; set; }
+
+        public static string ExcludeIP1 { get; set; }
+        public static string ExcludeIP2 { get; set; }
+        public static string ExcludeIP3 { get; set; }
+
+        public static string AnotherAuthServer { get; set; }
     }
 
     internal class Settings
@@ -60,6 +71,30 @@ namespace HUSauth.Models
                 var seed = Crypt.CreateSeed(mn + un + udn);
                 _Settings.EncryptedPassword = Crypt.Encrypt(value, seed);
             }
+        }
+
+        public static string ExcludeIP1 
+        {
+            get { return _Settings.ExcludeIP1; }
+            set { _Settings.ExcludeIP1 = value; }
+        }
+
+        public static string ExcludeIP2
+        {
+            get { return _Settings.ExcludeIP2; }
+            set { _Settings.ExcludeIP2 = value; }
+        }
+
+        public static string ExcludeIP3
+        {
+            get { return _Settings.ExcludeIP3; }
+            set { _Settings.ExcludeIP3 = value; }
+        }
+
+        public static string AnotherAuthServer 
+        {
+            get { return _Settings.AnotherAuthServer; }
+            set { _Settings.AnotherAuthServer = value; }
         }
 
         #endregion Accessor
@@ -108,6 +143,10 @@ namespace HUSauth.Models
             _Settings.Hash = xmls.Hash;
             _Settings.ID = xmls.ID;
             _Settings.EncryptedPassword = xmls.EncryptedPassword;
+            _Settings.ExcludeIP1 = xmls.ExcludeIP1;
+            _Settings.ExcludeIP2 = xmls.ExcludeIP2;
+            _Settings.ExcludeIP3 = xmls.ExcludeIP3;
+            _Settings.AnotherAuthServer = xmls.AnotherAuthServer;
         }
 
         public static void WriteSettings()
@@ -116,6 +155,10 @@ namespace HUSauth.Models
             xmls.Hash = _Settings.Hash;
             xmls.ID = _Settings.ID;
             xmls.EncryptedPassword = _Settings.EncryptedPassword;
+            xmls.ExcludeIP1 = _Settings.ExcludeIP1;
+            xmls.ExcludeIP2 = _Settings.ExcludeIP2;
+            xmls.ExcludeIP3 = _Settings.ExcludeIP3;
+            xmls.AnotherAuthServer = _Settings.AnotherAuthServer;
 
             var xs = new XmlSerializer(typeof(XMLSettings));
             using (var fs = new FileStream(FileName, FileMode.OpenOrCreate, FileAccess.Write))
