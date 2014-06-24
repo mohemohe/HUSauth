@@ -413,7 +413,8 @@ namespace HUSauth.ViewModels
 
         public void About()
         {
-            //TODO: About this application
+            var aw = new Views.AboutWindow();
+            aw.ShowDialog();
         }
         #endregion
 

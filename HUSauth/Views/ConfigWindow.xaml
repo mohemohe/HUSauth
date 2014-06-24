@@ -41,7 +41,7 @@
             <ColumnDefinition Width="2*"/>
         </Grid.ColumnDefinitions>
         <Label Content="認証先サーバーアドレス" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Height="25" Width="121"/>
-        <TextBox Height="23" Margin="10,35,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Text="必要な場合以外は空欄のままにしておいてください" IsTabStop="False" Grid.ColumnSpan="2" />
+        <TextBox Height="23" Margin="10,35,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Text="http://gonet.localhost/cgi-bin/guide.cgi" IsTabStop="False" Grid.ColumnSpan="2" />
         <TextBox Name="AnotherAuthServer" Height="23" Margin="10,35,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Text="{Binding AnotherAuthServer}" Background="#BFFFFFFF" Grid.ColumnSpan="2" TextChanged="AnotherAuthServer_TextChanged" />
 
         <Label Content="除外ローカルIPアドレス" HorizontalAlignment="Left" Margin="10,79,0,0" VerticalAlignment="Top"/>
