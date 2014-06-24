@@ -1,4 +1,4 @@
-HUSauth
+﻿HUSauth
 =======
 
 ### これ is 何
@@ -26,3 +26,8 @@ HUSauth
 
 MIT Licenseです  
 PullReqお待ちしております
+
+### ADDITIONAL LICENSE
+
+"appbar.information.circle.png" and "appbar.settings.png" are CC BY-ND 3.0 .  
+more infomation visit [https://github.com/Templarian/WindowsIcons/blob/master/WindowsPhone/license.txt](https://github.com/Templarian/WindowsIcons/blob/master/WindowsPhone/license.txt) .

@@ -84,6 +84,12 @@
                     </i:Interaction.Behaviors>
                 </PasswordBox>
                 <Button Name="LoginButton" Content="Login" HorizontalAlignment="Right" Margin="0,68,10,0" VerticalAlignment="Top" Width="75" Template="{DynamicResource LoginButton}" FontFamily="Meiryo" Height="24" Command="{Binding LoginCommand, Mode=OneWay}" />
+                <Button Name="ConfigButton" HorizontalAlignment="Left" Margin="0,80,0,0" VerticalAlignment="Top" Width="24" Template="{DynamicResource Button}" Command="{Binding ConfigCommand, Mode=OneWay}" Background="{x:Null}" Height="23" BorderBrush="{x:Null}" Foreground="{x:Null}">
+                    <Image Source="Resource/Modern UI Icons/appbar.settings.png" Stretch="Fill" />
+                </Button>
+                <Button Name="AboutButton" HorizontalAlignment="Left" Margin="25,80,0,0" VerticalAlignment="Top" Width="24" Template="{DynamicResource Button}" Command="{Binding AboutCommand, Mode=OneWay}" Background="{x:Null}" Height="23" BorderBrush="{x:Null}" Foreground="{x:Null}">
+                    <Image Source="Resource/Modern UI Icons/appbar.information.circle.png" Stretch="Fill" />
+                </Button>
             </Grid>
             <Grid Name="StatusBar" Height="24" VerticalAlignment="Bottom" Background="#FF007ACC">
                 <Label Content="{Binding StatusBarString, Mode=OneWay}" Foreground="White" FontFamily="Meiryo" />

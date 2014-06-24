@@ -1,0 +1,59 @@
+﻿<Window x:Class="HUSauth.Views.ConfigWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions"
+        xmlns:l="http://schemas.livet-mvvm.net/2011/wpf"
+        xmlns:v="clr-namespace:HUSauth.Views"
+        xmlns:vm="clr-namespace:HUSauth.ViewModels"
+        Title="設定" Height="268" Width="525" WindowStartupLocation="CenterOwner" ResizeMode="NoResize">
+
+    <Window.DataContext>
+        <vm:ConfigWindowViewModel/>
+    </Window.DataContext>
+
+    <i:Interaction.Triggers>
+
+        <!--Viewに特別な要件が存在しない限りは、トリガーやアクションの自作にこだわらず積極的にコードビハインドを使いましょう -->
+        <!--Viewのコードビハインドは、基本的にView内で完結するロジックとViewModelからのイベントの受信(専用リスナを使用する)に限るとトラブルが少なくなります -->
+        <!--Livet1.1からはコードビハインドでViewModelのイベントを受信するためのWeakEventLisnterサポートが追加されています -->
+
+        <!--WindowのContentRenderedイベントのタイミングでViewModelのInitializeメソッドが呼ばれます-->
+        <i:EventTrigger EventName="ContentRendered">
+            <l:LivetCallMethodAction MethodTarget="{Binding}" MethodName="Initialize"/>
+        </i:EventTrigger>
+
+        <!--Windowが閉じたタイミングでViewModelのDisposeメソッドが呼ばれます-->
+        <i:EventTrigger EventName="Closed">
+            <l:DataContextDisposeAction/>
+        </i:EventTrigger>
+        <l:InteractionMessageTrigger MessageKey="Close" Messenger="{Binding Messenger}" InvokeActionsOnlyWhileAttatchedObjectLoaded="True">
+            <l:WindowInteractionMessageAction />
+        </l:InteractionMessageTrigger>
+
+        <!--WindowのCloseキャンセル処理に対応する場合は、WindowCloseCancelBehaviorの使用を検討してください-->
+
+    </i:Interaction.Triggers>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="3*"/>
+            <ColumnDefinition Width="2*"/>
+        </Grid.ColumnDefinitions>
+        <Label Content="認証先サーバーアドレス" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Height="25" Width="121"/>
+        <TextBox Height="23" Margin="10,35,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Text="http://gonet.localhost/cgi-bin/guide.cgi" IsTabStop="False" Grid.ColumnSpan="2" />
+        <TextBox Name="AnotherAuthServer" Height="23" Margin="10,35,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Text="{Binding AnotherAuthServer}" Background="#BFFFFFFF" Grid.ColumnSpan="2" TextChanged="AnotherAuthServer_TextChanged" />
+
+        <Label Content="除外ローカルIPアドレス" HorizontalAlignment="Left" Margin="10,79,0,0" VerticalAlignment="Top"/>
+        <TextBox Height="23" Margin="10,104,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Text="IPアドレス割り当て確認時に除外する" IsTabStop="False" />
+        <TextBox Name="ExcludeIP1" Height="23" Margin="10,104,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Text="{Binding ExcludeIP1}" Background="#BFFFFFFF" TextChanged="ExcludeIP1_TextChanged" />
+        <TextBox Height="23" Margin="10,132,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Text="ローカルIPアドレスを3つまで入力します" IsTabStop="False" />
+        <TextBox Name="ExcludeIP2" Height="23" Margin="10,132,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Text="{Binding ExcludeIP2}" Background="#BFFFFFFF" TextChanged="ExcludeIP2_TextChanged" />
+        <TextBox Height="23" Margin="10,160,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Text="例: VirtualBox  192.168.50.1" IsTabStop="False" />
+        <TextBox Name="ExcludeIP3" Height="23" Margin="10,160,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Text="{Binding ExcludeIP3}" Background="#BFFFFFFF" TextChanged="ExcludeIP3_TextChanged" />
+
+        <Button Content="OK" HorizontalAlignment="Right" Margin="0,200,170,0" Width="75" Grid.ColumnSpan="2" Command="{Binding OKCommand, Mode=OneWay}" Height="19" VerticalAlignment="Top" />
+        <Button Content="キャンセル" Grid.Column="1" HorizontalAlignment="Right" Margin="0,200,90,0" Width="75" Command="{Binding CancelCommand, Mode=OneWay}" Height="19" VerticalAlignment="Top" />
+        <Button Content="適用" Grid.Column="1" Margin="0,200,10,0" Command="{Binding ApplyCommand, Mode=OneWay}" HorizontalAlignment="Right" Width="75" Height="19" VerticalAlignment="Top" />
+    </Grid>
+</Window>
