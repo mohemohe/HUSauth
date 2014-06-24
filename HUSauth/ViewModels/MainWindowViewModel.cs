@@ -74,7 +74,7 @@ namespace HUSauth.ViewModels
             ChangeStatusBarString("ネットワーク認証を確認しています");
             
             Settings.Initialize();
-
+            
             if (Settings.ID != null || Settings.Password != "")
             {
                 ID = Settings.ID;
@@ -134,7 +134,7 @@ namespace HUSauth.ViewModels
 
         private async void SystemEvents_PowerModeChanged(object sender, PowerModeChangedEventArgs e)
         {
-            if (Network.IsAvailable() == true)
+            if (network.IsAvailable() == true)
             {
                 return;
             }
@@ -148,7 +148,7 @@ namespace HUSauth.ViewModels
 
             try
             {
-                IsConnected = await Task.Run(() => Network.IsAvailable());
+                IsConnected = await Task.Run(() => network.IsAvailable());
             }
             catch
             {
@@ -170,7 +170,7 @@ namespace HUSauth.ViewModels
                             return;
                         }
 
-                        if (Network.CheckIPAddress() == true)
+                        if (network.CheckIPAddress() == true)
                         {
                             break;
                         }
@@ -331,7 +331,7 @@ namespace HUSauth.ViewModels
                         return;
                     }
 
-                    if (Network.CheckIPAddress() == true)
+                    if (network.CheckIPAddress() == true)
                     {
                         break;
                     }
@@ -340,7 +340,7 @@ namespace HUSauth.ViewModels
                 }
             });
 
-            await Task.Run(() => Network.DoAuth(id, password));
+            await Task.Run(() => network.DoAuth(id, password));
 
             int j = 0;
             while (j < 60)
@@ -352,7 +352,7 @@ namespace HUSauth.ViewModels
 
                 try
                 {
-                    IsConnected = await Task.Run(() => Network.IsAvailable());
+                    IsConnected = await Task.Run(() => network.IsAvailable());
                 }
                 catch { }
 

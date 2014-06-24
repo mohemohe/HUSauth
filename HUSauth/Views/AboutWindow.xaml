@@ -9,7 +9,7 @@
         Title="HUSauthについて" Height="433" Width="770" ResizeMode="NoResize">
 
     <Window.DataContext>
-        <vm:AboutWindowViewModel/>
+        <vm:AboutWindowViewModel />
     </Window.DataContext>
 
     <i:Interaction.Triggers>
@@ -20,41 +20,40 @@
 
         <!--WindowのContentRenderedイベントのタイミングでViewModelのInitializeメソッドが呼ばれます-->
         <i:EventTrigger EventName="ContentRendered">
-            <l:LivetCallMethodAction MethodTarget="{Binding}" MethodName="Initialize"/>
+            <l:LivetCallMethodAction MethodTarget="{Binding}" MethodName="Initialize" />
         </i:EventTrigger>
 
         <!--Windowが閉じたタイミングでViewModelのDisposeメソッドが呼ばれます-->
         <i:EventTrigger EventName="Closed">
-            <l:DataContextDisposeAction/>
+            <l:DataContextDisposeAction />
         </i:EventTrigger>
 
         <!--WindowのCloseキャンセル処理に対応する場合は、WindowCloseCancelBehaviorの使用を検討してください-->
-
     </i:Interaction.Triggers>
 
     <Grid>
-        <Image HorizontalAlignment="Left" Height="100" Margin="10,10,0,0" VerticalAlignment="Top" Width="100" Source="Resource/HUSauth.png" RenderOptions.BitmapScalingMode="HighQuality"/>
-        <Label Content="HUSauth" HorizontalAlignment="Left" Margin="115,10,0,0" VerticalAlignment="Top" FontFamily="Meiryo" FontSize="48" Foreground="#FF606060" Padding="5,0,0,0"/>
-        <Label Content="{Binding version}" HorizontalAlignment="Left" Margin="199,64,0,0" VerticalAlignment="Top" Padding="0,5,5,5" Foreground="#FFA0A0A0"/>
+        <Image HorizontalAlignment="Left" Height="100" Margin="10,10,0,0" VerticalAlignment="Top" Width="100" Source="Resource/HUSauth.png" RenderOptions.BitmapScalingMode="HighQuality" />
+        <Label Content="HUSauth" HorizontalAlignment="Left" Margin="115,10,0,0" VerticalAlignment="Top" FontFamily="Meiryo" FontSize="48" Foreground="#FF606060" Padding="5,0,0,0" />
+        <Label Content="{Binding version}" HorizontalAlignment="Left" Margin="199,64,0,0" VerticalAlignment="Top" Padding="0,5,5,5" Foreground="#FFA0A0A0" />
         <Label HorizontalAlignment="Left" Margin="115,89,0,0" VerticalAlignment="Top" Padding="5,5,5,0">
             <Hyperlink NavigateUri="http://ghippos.net/app/husauth.html" RequestNavigate="Hyperlink_Navigate">
                 http://ghippos.net/app/husauth.html
             </Hyperlink>
         </Label>
-        <Label Content="/" HorizontalAlignment="Left" Margin="345,89,0,0" VerticalAlignment="Top" Padding="0,5"/>
+        <Label Content="/" HorizontalAlignment="Left" Margin="345,89,0,0" VerticalAlignment="Top" Padding="0,5" />
         <Label HorizontalAlignment="Left" Margin="350,89,0,0" VerticalAlignment="Top" Padding="5,5,5,0">
             <Hyperlink NavigateUri="https://twitter.com/mohemohe" RequestNavigate="Hyperlink_Navigate">
                 @mohemohe
             </Hyperlink>
         </Label>
-        <Label Content="Built with: Livet and Modern UI Icons ." HorizontalAlignment="Left" Margin="10,128,0,0" VerticalAlignment="Top"/>
-        <Label Content="This application licensed under" HorizontalAlignment="Left" Margin="10,153,0,0" VerticalAlignment="Top" Padding="5,5,0,5"/>
+        <Label Content="Built with: Livet and Modern UI Icons ." HorizontalAlignment="Left" Margin="10,128,0,0" VerticalAlignment="Top" />
+        <Label Content="This application licensed under" HorizontalAlignment="Left" Margin="10,153,0,0" VerticalAlignment="Top" Padding="5,5,0,5" />
         <Label HorizontalAlignment="Left" Margin="195,153,0,0" VerticalAlignment="Top">
             <Hyperlink NavigateUri="http://opensource.org/licenses/mit-license.php" RequestNavigate="Hyperlink_Navigate">
                 The MIT/X11 License
             </Hyperlink>
         </Label>
-        <Label Content="." HorizontalAlignment="Left" Margin="329,153,0,0" VerticalAlignment="Top" Padding="0,5,5,5"/>
+        <Label Content="." HorizontalAlignment="Left" Margin="329,153,0,0" VerticalAlignment="Top" Padding="0,5,5,5" />
         <TabControl Margin="10,192,10,10">
             <TabItem Header="北海道科学大学 ネットワーク利用規約">
                 <Grid>

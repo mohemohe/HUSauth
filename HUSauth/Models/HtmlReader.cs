@@ -6,7 +6,7 @@ namespace HUSauth.Models
 {
     public class HtmlReader
     {
-        public static string HtmlRead(string Url)
+        public string HtmlRead(string Url)
         {
             using (var wc = new WebClient())
             {
@@ -19,7 +19,10 @@ namespace HUSauth.Models
                     var sr = new StreamReader(st, enc);
                     html = sr.ReadToEnd();
                 }
-                catch { }
+                catch (WebException)
+                {
+                    throw new ServerBusyException();
+                }
                 return html;
             }
         }

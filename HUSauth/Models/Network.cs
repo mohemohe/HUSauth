@@ -1,4 +1,5 @@
 ﻿using Livet;
+using System;
 using System.Collections.Specialized;
 using System.Net;
 using System.Net.NetworkInformation;
@@ -7,11 +8,18 @@ using System.Threading.Tasks;
 
 namespace HUSauth.Models
 {
+    /// <summary>
+    ///  ネットワーク周り
+    /// </summary>
     public class Network : NotificationObject
     {
         private System.Timers.Timer timer = new System.Timers.Timer();
 
-        public static bool CheckIPAddress()
+        /// <summary>
+        ///  DHCPで降ってきたローカルIPアドレスがあるかどうかを調べる
+        /// </summary>
+        /// <returns>有効なローカルIPアドレスが存在するかどうか</returns>
+        public bool CheckIPAddress()
         {
             var ani = NetworkInterface.GetAllNetworkInterfaces();
             foreach (var ni in ani)
@@ -35,7 +43,11 @@ namespace HUSauth.Models
             return false;
         }
 
-        public static bool IsAvailable()
+        /// <summary>
+        ///  ネットワーク外部のサーバーとpingの疎通ができるか調べる
+        /// </summary>
+        /// <returns>ネットワークが外部に接続できているかどうか</returns>
+        public bool IsAvailable()
         {
             var result = false;
 
@@ -45,7 +57,7 @@ namespace HUSauth.Models
                 {
                     for (int i = 0; i < 3; i++) // タイマーが5秒ごとだから3秒くらいなら大丈夫やろ
                     {
-                        var reply = ping.Send("randgrid.ghippos.net", 1000);
+                        var reply = ping.Send("randgrid.ghippos.net", 500); // ちょっと思うところがあってタイムアウトを短くする
 
                         if (reply.Status == IPStatus.Success)
                         {
@@ -54,31 +66,60 @@ namespace HUSauth.Models
                         }
                     }
                 }
-                catch { }
+                catch { } // ping.Send()で死ぬってほとんどあり得ないのでは
             }
 
             return result;
         }
 
-        public static bool AuthenticationCheck()
+        /// <summary>
+        ///  [もう使わないかも] ネットワーク外部のサーバーと接続できているか調べる
+        /// </summary>
+        /// <returns>接続できているかどうか</returns>
+        public bool AuthenticationCheck()
         {
-            var html = HtmlReader.HtmlRead("http://randgrid.ghippos.net/check.html");
+            var hr = new HtmlReader();
+            var html = "";
 
-            bool isAuthed;
+            var i = 0;
+            do
+            {
+                try
+                {
+                    html = hr.HtmlRead("http://randgrid.ghippos.net/check.html");
+                    break;
+                }
+                catch (ServerBusyException)
+                {
+                    continue;
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+                finally
+                {
+                    i++;
+                }
+            } while (i < 3);
 
             if (html.Contains("<title>CHECK</title>"))
             {
-                isAuthed = true;
+                return true;
             }
             else
             {
-                isAuthed = false;
+                return false;
             }
-
-            return isAuthed;
         }
 
-        public static bool DoAuth(string ID, string Password)
+        /// <summary>
+        ///  認証する
+        /// </summary>
+        /// <param name="ID">アカウントID</param>
+        /// <param name="Password">パスワード</param>
+        /// <returns>認証に成功したかどうか</returns>
+        public bool DoAuth(string ID, string Password)
         {
             var nvc = new NameValueCollection();
 
@@ -94,14 +135,10 @@ namespace HUSauth.Models
             {
                 wc.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; ASU2JS; rv:11.0) like Gecko | HUSauth");
 
-                string authServer;
+                var authServer = "http://gonet.localhost/cgi-bin/guide.cgi";
                 if (Settings.AnotherAuthServer != "")
                 {
                     authServer = Settings.AnotherAuthServer;
-                }
-                else
-                {
-                    authServer = "http://gonet.localhost/cgi-bin/guide.cgi";
                 }
 
                 int i = 0;
@@ -111,10 +148,8 @@ namespace HUSauth.Models
                     {
                         resData = wc.UploadValues(authServer, nvc);
                     }
-                    catch
+                    catch(WebException)
                     {
-                        //TODO: いつかちゃんと処理書こうな？
-
                         i++;
 
                         if (i < 5)
@@ -125,6 +160,10 @@ namespace HUSauth.Models
                         {
                             return false;
                         }
+                    }
+                    catch(Exception)
+                    {
+                        throw new UnknownException("認証情報の送信を試みましたが、不明なエラーにより失敗しました。");
                     }
 
                     break;
@@ -137,7 +176,10 @@ namespace HUSauth.Models
             {
                 resText = Encoding.UTF8.GetString(resData);
             }
-            catch { }
+            catch
+            {
+                throw new ReceivedCorruptDataException("認証先サーバーからの応答が正しくありません。");
+            }
 
             if (resText == "")
             {
@@ -191,6 +233,9 @@ namespace HUSauth.Models
 
         #endregion NetworkStatusBaloonString変更通知プロパティ
 
+        /// <summary>
+        ///  認証状況確認用タイマーをスタートする
+        /// </summary>
         public void StartAuthenticationCheckTimer()
         {
             timer.Elapsed += new System.Timers.ElapsedEventHandler(AuthenticationCheckTimer);
@@ -198,6 +243,9 @@ namespace HUSauth.Models
             timer.Enabled = true;
         }
 
+        /// <summary>
+        ///  認証状況確認用タイマーをストップする
+        /// </summary>
         public void StopAuthenticationCheckTimer()
         {
             timer.Elapsed -= new System.Timers.ElapsedEventHandler(AuthenticationCheckTimer);
@@ -206,7 +254,12 @@ namespace HUSauth.Models
 
         public bool isStarted = false;
 
-        public async void AuthenticationCheckTimer(object sender, System.Timers.ElapsedEventArgs e)
+        /// <summary>
+        ///  タイマーを使用して一定時間ごとに認証状況の確認をする
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private async void AuthenticationCheckTimer(object sender, System.Timers.ElapsedEventArgs e)
         {
             var isAvailable = false;
 
@@ -222,8 +275,6 @@ namespace HUSauth.Models
                 NetworkStatusString = "認証されていません";
                 NetworkStatusBaloonString = "認証が解除されました";
             }
-
-            
         }
     }
 }
