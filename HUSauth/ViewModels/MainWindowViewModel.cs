@@ -109,7 +109,10 @@ namespace HUSauth.ViewModels
 
             network.StartAuthenticationCheckTimer();
 
-            UpdateCheck();
+            if (network.IsAvailable() == true)
+            {
+                UpdateCheck();
+            }
         }
 
         private async void UpdateCheck() // 本来ならここに書くべきではない気もするけどしょうがないじゃん
