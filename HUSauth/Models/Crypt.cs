@@ -9,6 +9,11 @@ namespace HUSauth.Models
 {
     public static class Crypt
     {
+        /// <summary>
+        /// シード値を生成します
+        /// </summary>
+        /// <param name="str">生成元文字列</param>
+        /// <returns>シード値</returns>
         public static byte[] CreateSeed(string str)
         {
             byte[] baseStr = Encoding.UTF8.GetBytes(str);
@@ -20,6 +25,11 @@ namespace HUSauth.Models
             return seed;
         }
 
+        /// <summary>
+        /// シード値を生成します
+        /// </summary>
+        /// <param name="str">生成元バイト配列</param>
+        /// <returns>シード値</returns>
         public static byte[] CreateSeed(byte[] str)
         {
             byte[] baseStr = str;
@@ -31,6 +41,12 @@ namespace HUSauth.Models
             return seed;
         }
 
+        /// <summary>
+        /// 文字列を暗号化します
+        /// </summary>
+        /// <param name="str">暗号化したい文字列</param>
+        /// <param name="seed">シード値</param>
+        /// <returns>暗号化済み文字列</returns>
         public static string Encrypt(string str, byte[] seed)
         {
             using (var rm = new RijndaelManaged())
@@ -52,6 +68,12 @@ namespace HUSauth.Models
             }
         }
 
+        /// <summary>
+        /// 文字列を復号化します
+        /// </summary>
+        /// <param name="str">復号化したい文字列</param>
+        /// <param name="seed">シード値</param>
+        /// <returns>複合化済み文字列</returns>
         public static string Decrypt(string str, byte[] seed)
         {
             using (var rm = new RijndaelManaged())

@@ -120,7 +120,7 @@ namespace HUSauth.ViewModels
             if (uip.UpdateAvailable == true)
             {
                 MessageBoxResult result = System.Windows.MessageBox.Show(
-                    "新しいバージョンの HUSauth が見つかりました。\n" + uip.CurrentVersion + " -> " + uip.NextVersion + "\n\n配布サイトを開きますか？",
+                    "新しいバージョンの HUSauth が見つかりました。\n" + uip.CurrentVersion + " -> " + uip.AvailableVersion + "\n\n配布サイトを開きますか？",
                     "アップデートのお知らせ",
                     MessageBoxButton.YesNo,
                     MessageBoxImage.Information);
