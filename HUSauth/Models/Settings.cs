@@ -5,6 +5,9 @@ using System.Xml.Serialization;
 
 namespace HUSauth.Models
 {
+    /// <summary>
+    ///  XMLに書き出すための動的クラス
+    /// </summary>
     public class XMLSettings
     {
         public byte[] Hash;
@@ -20,36 +23,53 @@ namespace HUSauth.Models
         public string AnotherAuthServer = "";
     }
 
-    public class _Settings
-    {
-        public static byte[] Hash { get; set; }
-        public static string ID { get; set; }
-
-        public static string EncryptedPassword { get; set; }
-
-        public static string ExcludeIP1 { get; set; }
-        public static string ExcludeIP2 { get; set; }
-        public static string ExcludeIP3 { get; set; }
-
-        public static string AnotherAuthServer { get; set; }
-    }
-
+    /// <summary>
+    ///  設定を読み書きするクラス
+    /// </summary>
     internal class Settings
     {
+        # region Memory
+        /// <summary>
+        ///  実際の設定値はここに記憶される
+        /// </summary>
+        protected class _Settings
+        {
+            public static byte[] _Hash { get; set; }
+            public static string _ID { get; set; }
+
+            public static string _EncryptedPassword { get; set; }
+
+            public static string _ExcludeIP1 { get; set; }
+            public static string _ExcludeIP2 { get; set; }
+            public static string _ExcludeIP3 { get; set; }
+
+            public static string _AnotherAuthServer { get; set; }
+        }
+        #endregion
+
         #region Accessor
 
+        /// <summary>
+        ///  PCごとの簡易ハッシュ値
+        /// </summary>
         public static byte[] Hash
         {
-            get { return _Settings.Hash; }
-            set { _Settings.Hash = value; }
+            get { return _Settings._Hash; }
+            set { _Settings._Hash = value; }
         }
 
+        /// <summary>
+        ///  アカウントID
+        /// </summary>
         public static string ID
         {
-            get { return _Settings.ID; }
-            set { _Settings.ID = value; }
+            get { return _Settings._ID; }
+            set { _Settings._ID = value; }
         }
 
+        /// <summary>
+        ///  パスワード
+        /// </summary>
         public static string Password
         {
             get
@@ -60,7 +80,7 @@ namespace HUSauth.Models
 
                 var seed = Crypt.CreateSeed(mn + un + udn);
 
-                return Crypt.Decrypt(_Settings.EncryptedPassword, seed);
+                return Crypt.Decrypt(_Settings._EncryptedPassword, seed);
             }
             set
             {
@@ -69,38 +89,54 @@ namespace HUSauth.Models
                 var udn = Environment.UserDomainName;
 
                 var seed = Crypt.CreateSeed(mn + un + udn);
-                _Settings.EncryptedPassword = Crypt.Encrypt(value, seed);
+                _Settings._EncryptedPassword = Crypt.Encrypt(value, seed);
             }
         }
 
+        /// <summary>
+        ///  除外ローカルIPアドレス1
+        /// </summary>
         public static string ExcludeIP1 
         {
-            get { return _Settings.ExcludeIP1; }
-            set { _Settings.ExcludeIP1 = value; }
+            get { return _Settings._ExcludeIP1; }
+            set { _Settings._ExcludeIP1 = value; }
         }
 
+        /// <summary>
+        ///  除外ローカルIPアドレス2
+        /// </summary>
         public static string ExcludeIP2
         {
-            get { return _Settings.ExcludeIP2; }
-            set { _Settings.ExcludeIP2 = value; }
+            get { return _Settings._ExcludeIP2; }
+            set { _Settings._ExcludeIP2 = value; }
         }
 
+        /// <summary>
+        ///  除外ローカルIPアドレス3
+        /// </summary>
         public static string ExcludeIP3
         {
-            get { return _Settings.ExcludeIP3; }
-            set { _Settings.ExcludeIP3 = value; }
+            get { return _Settings._ExcludeIP3; }
+            set { _Settings._ExcludeIP3 = value; }
         }
 
+        /// <summary>
+        ///  その他の認証先サーバーのURL
+        /// </summary>
         public static string AnotherAuthServer 
         {
-            get { return _Settings.AnotherAuthServer; }
-            set { _Settings.AnotherAuthServer = value; }
+            get { return _Settings._AnotherAuthServer; }
+            set { _Settings._AnotherAuthServer = value; }
         }
 
         #endregion Accessor
 
         private static string FileName = "Settings.xml";
 
+        /// <summary>
+        ///  設定を読み込むのに必要なシード値を生成し、設定の読み込みを試行する
+        /// </summary>
+        /// <returns>設定を読み込めたかどうか</returns>
         public static bool Initialize()
         {
             var mn = Environment.MachineName;
@@ -118,18 +154,25 @@ namespace HUSauth.Models
                 {
                     Settings.ID = null;
                     Settings.Password = "";
+
+                    return false;
                 }
+
+                return true;
             }
             else
             {
                 Settings.ID = null;
                 Settings.Password = "";
                 Settings.Hash = hash;
-            }
 
-            return true;
+                return false;
+            }
         }
 
+        /// <summary>
+        ///  ファイルから設定を読み込む
+        /// </summary>
         private static void ReadSettings()
         {
             var xmls = new XMLSettings();
@@ -140,25 +183,28 @@ namespace HUSauth.Models
                 fs.Close();
             }
 
-            _Settings.Hash = xmls.Hash;
-            _Settings.ID = xmls.ID;
-            _Settings.EncryptedPassword = xmls.EncryptedPassword;
-            _Settings.ExcludeIP1 = xmls.ExcludeIP1;
-            _Settings.ExcludeIP2 = xmls.ExcludeIP2;
-            _Settings.ExcludeIP3 = xmls.ExcludeIP3;
-            _Settings.AnotherAuthServer = xmls.AnotherAuthServer;
+            _Settings._Hash = xmls.Hash;
+            _Settings._ID = xmls.ID;
+            _Settings._EncryptedPassword = xmls.EncryptedPassword;
+            _Settings._ExcludeIP1 = xmls.ExcludeIP1;
+            _Settings._ExcludeIP2 = xmls.ExcludeIP2;
+            _Settings._ExcludeIP3 = xmls.ExcludeIP3;
+            _Settings._AnotherAuthServer = xmls.AnotherAuthServer;
         }
 
+        /// <summary>
+        ///  ファイルへ設定を書き込む
+        /// </summary>
         public static void WriteSettings()
         {
             var xmls = new XMLSettings();
-            xmls.Hash = _Settings.Hash;
-            xmls.ID = _Settings.ID;
-            xmls.EncryptedPassword = _Settings.EncryptedPassword;
-            xmls.ExcludeIP1 = _Settings.ExcludeIP1;
-            xmls.ExcludeIP2 = _Settings.ExcludeIP2;
-            xmls.ExcludeIP3 = _Settings.ExcludeIP3;
-            xmls.AnotherAuthServer = _Settings.AnotherAuthServer;
+            xmls.Hash = _Settings._Hash;
+            xmls.ID = _Settings._ID;
+            xmls.EncryptedPassword = _Settings._EncryptedPassword;
+            xmls.ExcludeIP1 = _Settings._ExcludeIP1;
+            xmls.ExcludeIP2 = _Settings._ExcludeIP2;
+            xmls.ExcludeIP3 = _Settings._ExcludeIP3;
+            xmls.AnotherAuthServer = _Settings._AnotherAuthServer;
 
             var xs = new XmlSerializer(typeof(XMLSettings));
             using (var fs = new FileStream(FileName, FileMode.Create, FileAccess.Write))
