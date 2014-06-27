@@ -56,7 +56,7 @@ namespace HUSauth.Models
             uip.UpdateAvailable = updateAvailable;
             uip.CurrentVersion = string.Join(".", currentVersionArray);
             uip.AvailableVersion = _uip.AvailableVersion;
-            uip.DownloadURL = ""; //TODO: api.ghippos.net に手を加えるまでお待ちを
+            uip.DownloadURL = _uip.DownloadURL; ;
 
             return uip;
         }
@@ -83,7 +83,7 @@ namespace HUSauth.Models
                         {
                             uip.AvailableVersion = xtr.ReadString();
                         }
-                        if (xtr.Name == "URL")
+                        if (xtr.Name == "url")
                         {
                             uip.DownloadURL = xtr.ReadString();
                         }
