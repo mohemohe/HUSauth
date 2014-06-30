@@ -24,7 +24,7 @@ namespace HUSauth.Models
         public string AvailableVersion { get; set; }
         
         /// <summary>
-        /// 配布URL（未実装）
+        /// 配布URL
         /// </summary>
         public string DownloadURL { get; set; }
     }
