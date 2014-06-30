@@ -36,15 +36,15 @@
         <StackPanel Height="32" Margin="10,10,10,0" VerticalAlignment="Top" Orientation="Horizontal">
             <Label Content="Updating" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="18" FontFamily="Meiryo" Padding="5,0,0,5"/>
             <Label Content="{Binding Name}" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="18" FontFamily="Meiryo" Padding="5,0,0,5"/>
-            <Label Content="." HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="18" FontFamily="Meiryo" Padding="5,0,0,5"/>
+            <Label Content="..." HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="18" FontFamily="Meiryo" Padding="5,0,0,5"/>
         </StackPanel>
         <Label Content="Infomation:" HorizontalAlignment="Left" Margin="10,48,0,0" VerticalAlignment="Top"/>
-        <ScrollViewer Margin="10,73,10,166" HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto">
+        <ScrollViewer Margin="10,73,10,166" HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto" FontFamily="Meiryo">
             <TextBlock TextWrapping="Wrap" Text="{Binding Infomation}" VerticalAlignment="Top"/>
         </ScrollViewer>
         <Label Content="Log:" HorizontalAlignment="Left" Margin="10,158,0,0" VerticalAlignment="Top"/>
-        <ScrollViewer Margin="10,188,10,10" HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto">
-            <TextBlock TextWrapping="Wrap" Text="{Binding Log}" VerticalAlignment="Top"/>
+        <ScrollViewer Name="LogTextBlock" Margin="10,188,10,10" HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto">
+            <TextBlock TextWrapping="Wrap" Text="{Binding Log, NotifyOnTargetUpdated=True}" TargetUpdated="TextBlock_TargetUpdated"  VerticalAlignment="Top"/>
         </ScrollViewer>
     </Grid>
 </Window>

@@ -12,6 +12,8 @@ using Livet.EventListeners;
 using Livet.Messaging.Windows;
 
 using SoftwareUpdater.Models;
+using System.IO;
+using System.Reflection;
 
 namespace SoftwareUpdater.ViewModels
 {
@@ -59,9 +61,61 @@ namespace SoftwareUpdater.ViewModels
          * 自動的にUIDispatcher上での通知に変換されます。変更通知に際してUIDispatcherを操作する必要はありません。
          */
 
+        Model m = new Model();
+        UpdateInfoPack uip;
+        string appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
         public void Initialize()
         {
-            
+            var ui = new UpdateInfomation();
+            uip = ui.GetUpdateInfomation();
+
+            Name = uip.AppricationName;
+            Infomation = uip.Infomation;
+
+            var listener = new PropertyChangedEventListener(m);
+            listener.RegisterHandler((sender, e) => UpdateHandler(sender, e));
+            this.CompositeDisposable.Add(listener);
+
+            Update();
+        }
+
+        public void Update()
+        {
+            AddLog("Update to " + uip.AvailableVersion + " .");
+
+            AddLog("Downloading '" + Path.GetFileName(uip.DownloadURL) + "' .");
+
+            if (Directory.Exists(appPath + @"\tmp\") == false)
+            {
+                Directory.CreateDirectory(appPath + @"\tmp\");
+            }
+            m.download(uip.DownloadURL, appPath + @"\tmp\");
+        }
+
+        private void UpdateHandler(object sender, PropertyChangedEventArgs e)
+        {
+            var worker = sender as Model;
+            if (e.PropertyName == "Downloaded")
+            {
+                AddLog("Downloaded!");
+                AddLog("UnZipping...");
+                m.UnZip(appPath + @"\tmp\tmp.zip", appPath + @"\tmp\");
+            }
+            if (e.PropertyName == "UnZipped")
+            {
+                AddLog("UnZipped!");
+                AddLog("Copying files...");
+                m.FileCopy(appPath + @"\tmp\", appPath);
+            }
+            if (e.PropertyName == "CopiedFileName")
+            {
+                AddLog("Copied: " + worker.CopiedFileName);
+            }
+            if (e.PropertyName == "Copied")
+            {
+                AddLog("Update complete!");
+            }
         }
 
         #region Name変更通知プロパティ

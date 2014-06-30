@@ -31,5 +31,10 @@ namespace SoftwareUpdater.Views
         {
             InitializeComponent();
         }
+
+        private void TextBlock_TargetUpdated(object sender, DataTransferEventArgs e)
+        {
+            this.LogTextBlock.ScrollToBottom();
+        }
     }
 }
