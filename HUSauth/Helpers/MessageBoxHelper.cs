@@ -79,29 +79,35 @@ namespace HUSauth.Helpers
 
         #endregion
 
-        private static Queue<MessageBoxPack> q = new Queue<MessageBoxPack>();
+        private static Queue<MessageBoxPack> MessageBoxQueue = new Queue<MessageBoxPack>();
 
+        /// <summary>
+        /// キューに送られたとおりに非同期でメッセージボックスを表示します
+        /// </summary>
+        /// <param name="mbp">パック済みの内容</param>
         public static void AddMessageBoxQueue(MessageBoxPack mbp)
         {
-            q.Enqueue(mbp);
+            MessageBoxQueue.Enqueue(mbp);
 
             if (GetLockState() == false)
             {
-                ShowMessageBox();
+                ShowMessageBoxAsync();
             }
         }
 
-        private static async void ShowMessageBox()
+        private static async void ShowMessageBoxAsync()
         {
-            await Task.Run(() => { 
+            await Task.Run(() => 
+            {
                 Lock();
 
                 while (true)
                 {
-                    var mbp = new MessageBoxPack(q.Dequeue());
-                    System.Windows.MessageBox.Show(mbp.messageBoxText, mbp.caption, mbp.button, mbp.icon);
+                    var mbp = new MessageBoxPack(MessageBoxQueue.Dequeue());
+                    var result = System.Windows.MessageBox.Show(mbp.messageBoxText, mbp.caption, mbp.button, mbp.icon);
 
-                    if(q.Count == 0)
+                    
+                    if(MessageBoxQueue.Count == 0)
                     {
                         break;
                     }

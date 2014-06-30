@@ -104,6 +104,7 @@
     </Compile>
     <Compile Include="Exceptions.cs" />
     <Compile Include="Helpers\MessageBoxHelper.cs" />
+    <Compile Include="Helpers\NotifyIconHelper.cs" />
     <Compile Include="Models\Crypt.cs" />
     <Compile Include="Models\HtmlReader.cs" />
     <Compile Include="Models\Model.cs" />

@@ -65,10 +65,10 @@
                 <Label Content="{Binding version}" Margin="94,0,0,0" Width="auto" Height="auto" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Meiryo" Foreground="Gray" Padding="0,5,5,5" />
 
                 <StackPanel Orientation="Horizontal" Margin="0,0,3,0" HorizontalAlignment="Right" VerticalAlignment="Top">
-                    <Button Name="MinimizeButton" WindowChrome.IsHitTestVisibleInChrome="True" Width="28" Height="20" Margin="0" BorderBrush="{x:Null}" Template="{DynamicResource MinimizeButton}" Command="{Binding MinimizeCommand, Mode=OneWay}">
+                    <Button Name="MinimizeButton" WindowChrome.IsHitTestVisibleInChrome="True" Width="28" Height="20" Margin="0" BorderBrush="{x:Null}" Template="{DynamicResource MinimizeButton}" Command="{Binding MinimizeWindowCommand, Mode=OneWay}">
                         <Label Content="0" FontFamily="Marlett" Foreground="White" />
                     </Button>
-                    <Button Name="CloseButton"  WindowChrome.IsHitTestVisibleInChrome="True" Width="48" Height="20" Margin="0" BorderBrush="{x:Null}" Template="{DynamicResource CloseButton}" Command="{Binding CloseCommand, Mode=OneWay}">
+                    <Button Name="CloseButton"  WindowChrome.IsHitTestVisibleInChrome="True" Width="48" Height="20" Margin="0" BorderBrush="{x:Null}" Template="{DynamicResource CloseButton}" Command="{Binding CloseWindowCommand, Mode=OneWay}">
                         <Label Content="r" FontFamily="Marlett" Foreground="White" />
                     </Button>
                 </StackPanel>
