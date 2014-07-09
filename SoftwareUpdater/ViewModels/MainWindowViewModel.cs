@@ -14,6 +14,9 @@ using Livet.Messaging.Windows;
 using SoftwareUpdater.Models;
 using System.IO;
 using System.Reflection;
+using System.Threading.Tasks;
+using System.Threading;
+using System.Diagnostics;
 
 namespace SoftwareUpdater.ViewModels
 {
@@ -77,7 +80,14 @@ namespace SoftwareUpdater.ViewModels
             listener.RegisterHandler((sender, e) => UpdateHandler(sender, e));
             this.CompositeDisposable.Add(listener);
 
-            Update();
+            if (uip.CanAutoUpdate == true)
+            {
+                Update();
+            }
+            else
+            {
+                CantUpdate();
+            }
         }
 
         public void Update()
@@ -91,9 +101,26 @@ namespace SoftwareUpdater.ViewModels
                 Directory.CreateDirectory(appPath + @"\tmp\");
             }
             m.download(uip.DownloadURL, appPath + @"\tmp\");
+
+            
         }
 
-        private void UpdateHandler(object sender, PropertyChangedEventArgs e)
+        public async void CantUpdate()
+        {
+            AddLog("Can't auto update to " + uip.AvailableVersion + " .");
+            AddLog("Please download zipped application, and overwrite manually.");
+            AddLog("");
+            AddLog("Auto updater will soon open the default web browser...");
+
+            await Task.Run(() =>    
+            {
+                Thread.Sleep(3000);
+                Process.Start(uip.DownloadURL);
+                Messenger.Raise(new WindowActionMessage(WindowAction.Close, "Close"));
+            });
+        }
+
+        private async void UpdateHandler(object sender, PropertyChangedEventArgs e)
         {
             var worker = sender as Model;
             if (e.PropertyName == "Downloaded")
@@ -115,6 +142,30 @@ namespace SoftwareUpdater.ViewModels
             if (e.PropertyName == "Copied")
             {
                 AddLog("Update complete!");
+                AddLog("Delete temporary files...");
+                m.DeleteDir(appPath + @"\tmp\");
+            }
+            if (e.PropertyName == "Deleted")
+            {
+                AddLog("delete complete!");
+                AddLog("Restarting...");
+                m.Restart(Path.Combine(appPath, Name + ".exe"));
+            }
+            if (e.PropertyName == "Restarted")
+            {
+                AddLog("Restarted!");
+                AddLog("");
+                AddLog("This updater will exit in 5sec...");
+
+                await Task.Run(() => 
+                {
+                    Thread.Sleep(5000);
+                    Messenger.Raise(new WindowActionMessage(WindowAction.Close, "Close"));
+                });
+                            }
+            if (e.PropertyName == "AnotherLogMessage")
+            {
+                AddLog(worker.AnotherLogMessage);
             }
         }
 

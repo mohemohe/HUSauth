@@ -29,6 +29,11 @@ namespace SoftwareUpdater.Models
         /// 配布URL
         /// </summary>
         public string DownloadURL { get; set; }
+
+        /// <summary>
+        /// 自動アップデート可能かどうか
+        /// </summary>
+        public bool CanAutoUpdate { get; set; }
     }
 
     class UpdateInfomation
@@ -62,6 +67,18 @@ namespace SoftwareUpdater.Models
                         if (xtr.Name == "url")
                         {
                             uip.DownloadURL = xtr.ReadString();
+                        }
+                        if (xtr.Name == "canautoupdate")
+                        {
+                            var tmp = xtr.ReadString();
+                            if (tmp == "1")
+                            {
+                                uip.CanAutoUpdate = true;
+                            }
+                            else
+                            {
+                                uip.CanAutoUpdate = false;
+                            }
                         }
                     }
                 }

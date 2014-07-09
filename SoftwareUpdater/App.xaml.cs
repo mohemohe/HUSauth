@@ -6,6 +6,7 @@ using System.Linq;
 using System.Windows;
 
 using Livet;
+using SoftwareUpdater.Models;
 
 namespace SoftwareUpdater
 {
@@ -18,6 +19,8 @@ namespace SoftwareUpdater
         {
             DispatcherHelper.UIDispatcher = Dispatcher;
             //AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
+
+            Settings.args = e.Args;
         }
 
         //集約エラーハンドラ

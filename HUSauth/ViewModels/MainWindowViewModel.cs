@@ -9,6 +9,8 @@ using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -62,6 +64,7 @@ namespace HUSauth.ViewModels
 
         public Network network;
         private Version _version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+        string appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
         public string version
         {
@@ -97,11 +100,34 @@ namespace HUSauth.ViewModels
 
         private async void UpdateCheck() // 本来ならここに書くべきではない気もするけどしょうがないじゃん
         {
+            if(Settings.AllowUpdateCheck == false)
+            {
+                return;
+            }
+
             var uc = new UpdateChecker();
             UpdateInfoPack uip = await Task.Run(() => uc.UpdateCheck(version));
 
             if (uip.UpdateAvailable == true)
             {
+                if(File.Exists(Path.Combine(appPath, "SoftwareUpdater.exe")) == true)
+                {
+                    if (Settings.AllowAutoUpdate == true)
+                    {
+                        if (ID != null && Password != null)
+                        {
+                            Settings.ID = ID;
+                            Settings.Password = Password;
+
+                            Settings.WriteSettings();
+                        }
+
+                        Process.Start(Path.Combine(appPath, "SoftwareUpdater.exe"));
+
+                        NotifyIconHelper.MainWindowExit();
+                    }
+                }
+
                 MessageBoxResult result = System.Windows.MessageBox.Show(
                     "新しいバージョンの HUSauth が見つかりました。\n" + uip.CurrentVersion + " -> " + uip.AvailableVersion + "\n\nダウンロードしますか？",
                     "アップデートのお知らせ",

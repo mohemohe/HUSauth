@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Net;
 using System.IO;
 using System.IO.Compression;
+using System.Diagnostics;
 
 namespace SoftwareUpdater.Models
 {
@@ -38,6 +39,32 @@ namespace SoftwareUpdater.Models
             });
         }
 
+        public bool CheckPrecessKilled()
+        {
+            if (Settings.args.Length == 0)
+            {
+                return false;
+            }
+
+            foreach(var arg in Settings.args)
+            {
+                var name = arg;
+
+                if (arg.Substring(arg.Length - 4) != ".exe")
+                {
+                    name = name + ".exe";
+                }
+
+                Process[] ps = Process.GetProcessesByName(name);
+                if (ps.Length != 0)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         public async void UnZip(string zipPath, string extPath)
         {
             await Task.Run(() =>
@@ -54,19 +81,60 @@ namespace SoftwareUpdater.Models
                 var files = Directory.GetFiles(sourceDir);
                 foreach(var f in files)
                 {
-                    if (f != "tmp.zip" || f != "SoftwareUpdater.exe")
+                    if (Path.GetFileName(f) != "tmp.zip")
                     {
-                        using (FileStream fs1 = new FileStream(Path.Combine(sourceDir, f), FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                        using (FileStream fs2 = new FileStream(Path.Combine(targetDir, f), FileMode.Create, FileAccess.Write, FileShare.ReadWrite))
-                        {
-                            fs1.CopyTo(fs2);
-                        }
+                        try{
+                            using (var fs1 = new FileStream(Path.Combine(sourceDir, Path.GetFileName(f)), FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                            using (var fs2 = new FileStream(Path.Combine(targetDir, Path.GetFileName(f)), FileMode.Create, FileAccess.Write, FileShare.Read))
+                            {
+                                fs1.CopyTo(fs2);
+                                fs2.Close();
+                                fs1.Close();
+                            }
 
-                        CopiedFileName = Path.GetFileName(f);
+                            CopiedFileName = Path.GetFileName(f);
+                        }
+                        catch (IOException) 
+                        {
+                            AnotherLogMessage = "Skipped: " + Path.GetFileName(f) + " (IOException)";
+                        }
                     }
                 }
 
                 RaisePropertyChanged("Copied");
+            });
+        }
+
+        public void ReName(string targetPath)
+        {
+            File.Move(targetPath, Path.Combine(targetPath, ".old"));
+        }
+
+        public async void DeleteDir(string targetDir)
+        {
+            await Task.Run(() => 
+            {
+                try
+                {
+                    Directory.Delete(targetDir, true);
+                }
+                catch
+                {
+                    AnotherLogMessage = "Can't delete temporary directory.";
+                }
+                RaisePropertyChanged("Deleted");
+            });
+        }
+
+        public async void Restart(string targetExe)
+        {
+            await Task.Run(() => 
+            {
+                if (File.Exists(targetExe))
+                {
+                    Process.Start(targetExe);
+                }
+                RaisePropertyChanged("Restarted");
             });
         }
 
@@ -86,5 +154,24 @@ namespace SoftwareUpdater.Models
             }
         }
         #endregion
+
+
+        #region AnotherLogMessage変更通知プロパティ
+        private string _AnotherLogMessage;
+
+        public string AnotherLogMessage
+        {
+            get
+            { return _AnotherLogMessage; }
+            set
+            { 
+                if (_AnotherLogMessage == value)
+                    return;
+                _AnotherLogMessage = value;
+                RaisePropertyChanged("AnotherLogMessage");
+            }
+        }
+        #endregion
+
     }
 }
