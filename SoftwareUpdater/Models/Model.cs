@@ -83,7 +83,21 @@ namespace SoftwareUpdater.Models
                 {
                     if (Path.GetFileName(f) != "tmp.zip")
                     {
+                        try
+                        {
+                            if (File.Exists(Path.Combine(targetDir, Path.GetFileName(f)) + ".old"))
+                            {
+                                File.Delete(Path.Combine(targetDir, Path.GetFileName(f)) + ".old");
+                            }
+                        }
+                        catch { }
+
                         try{
+                            if(File.Exists(Path.Combine(targetDir, Path.GetFileName(f))))
+                            {
+                                File.Move(Path.Combine(targetDir, Path.GetFileName(f)), Path.Combine(targetDir, Path.GetFileName(f)) + ".old");
+                            }
+                            
                             using (var fs1 = new FileStream(Path.Combine(sourceDir, Path.GetFileName(f)), FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                             using (var fs2 = new FileStream(Path.Combine(targetDir, Path.GetFileName(f)), FileMode.Create, FileAccess.Write, FileShare.Read))
                             {
@@ -97,6 +111,18 @@ namespace SoftwareUpdater.Models
                         catch (IOException) 
                         {
                             AnotherLogMessage = "Skipped: " + Path.GetFileName(f) + " (IOException)";
+                        }
+
+                        try
+                        {
+                            if(File.Exists(Path.Combine(targetDir, Path.GetFileName(f)) + ".old"))
+                            {
+                                File.Delete(Path.Combine(targetDir, Path.GetFileName(f)) + ".old");
+                            }
+                        }
+                        catch
+                        {
+                            AnotherLogMessage = "Cant delete an old file: " + Path.GetFileName(f) + ".old (IOException)";
                         }
                     }
                 }
