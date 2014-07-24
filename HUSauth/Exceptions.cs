@@ -16,6 +16,15 @@ namespace HUSauth
         public UnknownException(string message, Exception inner) : base(message) { }
     }
 
+    public class NullException : Exception
+    {
+        public NullException() { }
+
+        public NullException(string message) : base(message) { }
+
+        public NullException(string message, Exception inner) : base(message) { }
+    }
+
     public class ReceivedCorruptDataException : Exception
     {
         public ReceivedCorruptDataException() { }

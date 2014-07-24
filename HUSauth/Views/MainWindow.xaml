@@ -47,7 +47,10 @@
         <l:InteractionMessageTrigger InvokeActionsOnlyWhileAttatchedObjectLoaded="True" MessageKey="Minimize" Messenger="{Binding Messenger}">
             <l:WindowInteractionMessageAction />
         </l:InteractionMessageTrigger>
-
+        <l:InteractionMessageTrigger Messenger="{Binding Messenger}" MessageKey="Information">
+            <l:InformationDialogInteractionMessageAction/>
+        </l:InteractionMessageTrigger>
+        
         <!--WindowのCloseキャンセル処理に対応する場合は、WindowCloseCancelBehaviorの使用を検討してください-->
     </i:Interaction.Triggers>
 

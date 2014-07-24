@@ -110,11 +110,18 @@ namespace HUSauth.Models
             var result = new int[3];
             var _result = new string[4];
 
-            _result = version.Split('.');
-
-            for (int i = 0; i < 3; i++)
+            try
             {
-                result[i] = int.Parse(_result[i]);
+                _result = version.Split('.');
+
+                for (int i = 0; i < 3; i++)
+                {
+                    result[i] = int.Parse(_result[i]);
+                }
+            }
+            catch
+            {
+                return new int[4] { 0, 0, 0, 0 };
             }
 
             return result;

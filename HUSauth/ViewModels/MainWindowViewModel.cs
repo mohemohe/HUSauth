@@ -3,6 +3,7 @@ using HUSauth.Models;
 using Livet;
 using Livet.Commands;
 using Livet.EventListeners;
+using Livet.Messaging;
 using Livet.Messaging.Windows;
 using Microsoft.Win32;
 using System;
@@ -122,7 +123,7 @@ namespace HUSauth.ViewModels
                             Settings.WriteSettings();
                         }
 
-                        Process.Start(Path.Combine(appPath, "SoftwareUpdater.exe"));
+                        Process.Start(Path.Combine(appPath, "SoftwareUpdater.exe") + " /HUSauth");
 
                         NotifyIconHelper.MainWindowExit();
                     }
@@ -295,7 +296,17 @@ namespace HUSauth.ViewModels
                 }
             });
 
-            await Task.Run(() => network.DoAuth(id, password));
+            await Task.Run(() => 
+            {
+                try
+                {
+                    network.DoAuth(id, password);
+                }
+                catch (NullException e)
+                {
+                    Messenger.Raise(new InformationMessage(e.Message, "error", "Information"));
+                }
+            });
 
             int j = 0;
             while (j < 60)

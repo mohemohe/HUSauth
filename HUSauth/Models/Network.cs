@@ -121,6 +121,11 @@ namespace HUSauth.Models
         /// <returns>認証に成功したかどうか</returns>
         public bool DoAuth(string ID, string Password)
         {
+            if (ID == "" || Password == "")
+            {
+                throw new NullException("認証に必要なアカウント情報が入力されていません。");
+            }
+
             var nvc = new NameValueCollection();
 
             nvc.Add("user_id", ID);
