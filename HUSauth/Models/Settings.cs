@@ -21,6 +21,9 @@ namespace HUSauth.Models
         public string ExcludeIP3 = "";
 
         public string AnotherAuthServer = "";
+
+        public bool AllowUpdateCheck = true;
+        public bool AllowAutoUpdate = true;
     }
 
     /// <summary>
@@ -44,6 +47,9 @@ namespace HUSauth.Models
             public static string _ExcludeIP3 { get; set; }
 
             public static string _AnotherAuthServer { get; set; }
+
+            public static bool? _AllowUpdateCheck { get; set; }
+            public static bool? _AllowAutoUpdate { get; set; }
         }
         #endregion
 
@@ -129,6 +135,26 @@ namespace HUSauth.Models
             set { _Settings._AnotherAuthServer = value; }
         }
 
+        public static bool AllowUpdateCheck
+        {
+            get 
+            {
+                if (_Settings._AllowUpdateCheck == null) { return true; }
+                else { return (bool)_Settings._AllowUpdateCheck; }
+            }
+            set { _Settings._AllowAutoUpdate = value; }
+        }
+
+        public static bool AllowAutoUpdate
+        {
+            get
+            {
+                if (_Settings._AllowAutoUpdate == null) { return true; }
+                else { return (bool)_Settings._AllowAutoUpdate; }
+            }
+            set { _Settings._AllowAutoUpdate = value; }
+        }
+
         #endregion Accessor
 
         private static string FileName = "Settings.xml";
@@ -190,6 +216,8 @@ namespace HUSauth.Models
             _Settings._ExcludeIP2 = xmls.ExcludeIP2;
             _Settings._ExcludeIP3 = xmls.ExcludeIP3;
             _Settings._AnotherAuthServer = xmls.AnotherAuthServer;
+            _Settings._AllowUpdateCheck = xmls.AllowUpdateCheck;
+            _Settings._AllowAutoUpdate = xmls.AllowAutoUpdate;
         }
 
         /// <summary>
@@ -205,6 +233,8 @@ namespace HUSauth.Models
             xmls.ExcludeIP2 = _Settings._ExcludeIP2;
             xmls.ExcludeIP3 = _Settings._ExcludeIP3;
             xmls.AnotherAuthServer = _Settings._AnotherAuthServer;
+            xmls.AllowUpdateCheck = Settings.AllowUpdateCheck;
+            xmls.AllowAutoUpdate = Settings.AllowAutoUpdate;
 
             var xs = new XmlSerializer(typeof(XMLSettings));
             using (var fs = new FileStream(FileName, FileMode.Create, FileAccess.Write))

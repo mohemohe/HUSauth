@@ -52,6 +52,10 @@
         <TextBox Height="23" Margin="10,160,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Text="例: VirtualBox  192.168.50.1" IsTabStop="False" />
         <TextBox Name="ExcludeIP3" Height="23" Margin="10,160,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Text="{Binding ExcludeIP3}" Background="#BFFFFFFF" TextChanged="ExcludeIP3_TextChanged" />
 
+        <Label Content="アップデート" Grid.Column="1" HorizontalAlignment="Left" Margin="10,79,0,0" VerticalAlignment="Top"/>
+        <CheckBox Content="アップデートを定期的に確認する" IsChecked="{Binding AllowUpdateCheck}" Grid.Column="1" HorizontalAlignment="Left" Margin="10,106,0,0" VerticalAlignment="Top"/>
+        <CheckBox Content="自動でアップデートする" IsChecked="{Binding AllowAutoUpdate}" IsEnabled="{Binding AllowAutoUpdate_IsEnable}" Grid.Column="1" HorizontalAlignment="Left" Margin="10,134,0,0" VerticalAlignment="Top"/>
+        
         <Button Content="OK" HorizontalAlignment="Right" Margin="0,200,170,0" Width="75" Grid.ColumnSpan="2" Command="{Binding OKCommand, Mode=OneWay}" Height="19" VerticalAlignment="Top" />
         <Button Content="キャンセル" Grid.Column="1" HorizontalAlignment="Right" Margin="0,200,90,0" Width="75" Command="{Binding CancelCommand, Mode=OneWay}" Height="19" VerticalAlignment="Top" />
         <Button Content="適用" Grid.Column="1" Margin="0,200,10,0" Command="{Binding ApplyCommand, Mode=OneWay}" HorizontalAlignment="Right" Width="75" Height="19" VerticalAlignment="Top" />

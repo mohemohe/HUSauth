@@ -24,7 +24,7 @@ namespace HUSauth.Models
         public string AvailableVersion { get; set; }
         
         /// <summary>
-        /// 配布URL（未実装）
+        /// 配布URL
         /// </summary>
         public string DownloadURL { get; set; }
     }
@@ -56,7 +56,7 @@ namespace HUSauth.Models
             uip.UpdateAvailable = updateAvailable;
             uip.CurrentVersion = string.Join(".", currentVersionArray);
             uip.AvailableVersion = _uip.AvailableVersion;
-            uip.DownloadURL = ""; //TODO: api.ghippos.net に手を加えるまでお待ちを
+            uip.DownloadURL = _uip.DownloadURL; ;
 
             return uip;
         }
@@ -83,7 +83,7 @@ namespace HUSauth.Models
                         {
                             uip.AvailableVersion = xtr.ReadString();
                         }
-                        if (xtr.Name == "URL")
+                        if (xtr.Name == "url")
                         {
                             uip.DownloadURL = xtr.ReadString();
                         }
@@ -110,11 +110,18 @@ namespace HUSauth.Models
             var result = new int[3];
             var _result = new string[4];
 
-            _result = version.Split('.');
-
-            for (int i = 0; i < 3; i++)
+            try
             {
-                result[i] = int.Parse(_result[i]);
+                _result = version.Split('.');
+
+                for (int i = 0; i < 3; i++)
+                {
+                    result[i] = int.Parse(_result[i]);
+                }
+            }
+            catch
+            {
+                return new int[4] { 0, 0, 0, 0 };
             }
 
             return result;

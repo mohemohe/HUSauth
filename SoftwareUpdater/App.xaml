@@ -1,7 +1,9 @@
-﻿<Application x:Class="HUSauth.App"
+﻿<Application x:Class="SoftwareUpdater.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             Startup="Application_Startup" Exit="Application_Exit">
+             StartupUri="Views\MainWindow.xaml"
+             Startup="Application_Startup">
     <Application.Resources>
+         
     </Application.Resources>
 </Application>

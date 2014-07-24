@@ -132,6 +132,68 @@ namespace HUSauth.ViewModels
         }
         #endregion
 
+        #region AllowUpdateCheck変更通知プロパティ
+        private bool _AllowUpdateCheck;
+
+        public bool AllowUpdateCheck
+        {
+            get
+            { return _AllowUpdateCheck; }
+            set
+            { 
+                if (_AllowUpdateCheck == value)
+                    return;
+                _AllowUpdateCheck = value;
+
+                if (value == true)
+                {
+                    AllowAutoUpdate_IsEnable = true;
+                }
+                else
+                {
+                    AllowAutoUpdate_IsEnable = false;
+                }
+
+                RaisePropertyChanged();
+            }
+        }
+        #endregion
+
+        #region AllowAutoUpdate変更通知プロパティ
+        private bool _AllowAutoUpdate;
+
+        public bool AllowAutoUpdate
+        {
+            get
+            { return _AllowAutoUpdate; }
+            set
+            { 
+                if (_AllowAutoUpdate == value)
+                    return;
+                _AllowAutoUpdate = value;
+                RaisePropertyChanged();
+            }
+        }
+        #endregion
+
+
+        #region AllowAutoUpdate_IsEnable変更通知プロパティ
+        private bool _AllowAutoUpdate_IsEnable;
+
+        public bool AllowAutoUpdate_IsEnable
+        {
+            get
+            { return _AllowAutoUpdate_IsEnable; }
+            set
+            { 
+                if (_AllowAutoUpdate_IsEnable == value)
+                    return;
+                _AllowAutoUpdate_IsEnable = value;
+                RaisePropertyChanged();
+            }
+        }
+        #endregion
+
 
         #endregion
 
@@ -146,6 +208,8 @@ namespace HUSauth.ViewModels
             ExcludeIP2 = Settings.ExcludeIP2;
             ExcludeIP3 = Settings.ExcludeIP3;
             AnotherAuthServer = Settings.AnotherAuthServer;
+            AllowUpdateCheck = Settings.AllowUpdateCheck;
+            AllowAutoUpdate = Settings.AllowAutoUpdate;
         }
 
         private void WriteSettings()
@@ -154,6 +218,8 @@ namespace HUSauth.ViewModels
             Settings.ExcludeIP2 = ExcludeIP2;
             Settings.ExcludeIP3 = ExcludeIP3;
             Settings.AnotherAuthServer = AnotherAuthServer;
+            Settings.AllowUpdateCheck = AllowUpdateCheck;
+            Settings.AllowAutoUpdate = AllowAutoUpdate;
         }
 
         #region OKCommand
