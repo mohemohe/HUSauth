@@ -123,9 +123,10 @@ namespace HUSauth.ViewModels
                             Settings.WriteSettings();
                         }
 
-                        Process.Start(Path.Combine(appPath, "SoftwareUpdater.exe") + " /HUSauth");
+                        Process.Start(Path.Combine(appPath, "SoftwareUpdater.exe"));
 
                         NotifyIconHelper.MainWindowExit();
+                        return;
                     }
                 }
 
