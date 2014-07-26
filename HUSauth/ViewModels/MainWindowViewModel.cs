@@ -384,7 +384,6 @@ namespace HUSauth.ViewModels
         }
         #endregion
 
-
         #region StatusBarString変更通知プロパティ
 
         //lpropn
@@ -441,25 +440,6 @@ namespace HUSauth.ViewModels
         }
 
         #endregion IsShowTaskBar変更通知プロパティ
-
-        #region Opacity変更通知プロパティ
-
-        private double _Opacity = 1.0;
-
-        public double Opacity
-        {
-            get
-            { return _Opacity; }
-            set
-            {
-                if (_Opacity == value)
-                    return;
-                _Opacity = value;
-                RaisePropertyChanged();
-            }
-        }
-
-        #endregion Opacity変更通知プロパティ
 
         #region ID変更通知プロパティ
 
