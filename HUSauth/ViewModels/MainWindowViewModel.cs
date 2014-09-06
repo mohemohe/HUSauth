@@ -67,7 +67,7 @@ namespace HUSauth.ViewModels
         private Version _version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
         string appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
-        public string version
+        private string version
         {
             get { return _version.ToString(); }
         }
@@ -275,6 +275,9 @@ namespace HUSauth.ViewModels
 
         public async void Login()
         {
+            ChangeStatusBarString("認証中...");
+            LoginButtonIsEnabled = false;
+
             var id = ID;
             var password = Password;
 
@@ -314,9 +317,6 @@ namespace HUSauth.ViewModels
             {
                 var IsConnected = false;
 
-                ChangeStatusBarString("認証中...");
-
-
                 try
                 {
                     IsConnected = await Task.Run(() => network.IsAvailable());
@@ -328,6 +328,8 @@ namespace HUSauth.ViewModels
                     ChangeStatusBarString("認証されています");
                     UpdateCheck();
 
+                    LoginButtonIsEnabled = true;
+
                     return;
                 }
 
@@ -336,10 +338,28 @@ namespace HUSauth.ViewModels
             }
 
             ChangeStatusBarString("認証に失敗しました");
+            LoginButtonIsEnabled = true;
         }
 
         #endregion LoginCommand
-        
+
+        #region LoginButtonIsEnabled変更通知プロパティ
+        private bool _LoginButtonIsEnabled = true;
+
+        public bool LoginButtonIsEnabled
+        {
+            get
+            { return _LoginButtonIsEnabled; }
+            set
+            { 
+                if (_LoginButtonIsEnabled == value)
+                    return;
+                _LoginButtonIsEnabled = value;
+                RaisePropertyChanged();
+            }
+        }
+        #endregion
+
         #region ConfigCommand
         private ViewModelCommand _ConfigCommand;
 

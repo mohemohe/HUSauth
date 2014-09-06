@@ -86,7 +86,7 @@
                         <l:PasswordBoxBindingSupportBehavior Password="{Binding Password}" />
                     </i:Interaction.Behaviors>
                 </PasswordBox>
-                <Button Name="LoginButton" Content="Login" HorizontalAlignment="Right" Margin="0,68,10,0" VerticalAlignment="Top" Width="75" Template="{DynamicResource LoginButton}" FontFamily="Meiryo" Height="24" Command="{Binding LoginCommand, Mode=OneWay}" />
+                <Button Name="LoginButton" Content="Login" IsEnabled="{Binding LoginButtonIsEnabled}" HorizontalAlignment="Right" Margin="0,68,10,0" VerticalAlignment="Top" Width="75" Template="{DynamicResource LoginButton}" FontFamily="Meiryo" Height="24" Command="{Binding LoginCommand, Mode=OneWay}" />
                 <Button Name="ConfigButton" HorizontalAlignment="Left" Margin="0,80,0,0" VerticalAlignment="Top" Width="24" Template="{DynamicResource Button}" Command="{Binding ConfigCommand, Mode=OneWay}" Background="{x:Null}" Height="23" BorderBrush="{x:Null}" Foreground="{x:Null}">
                     <Image Source="Resource/Modern UI Icons/appbar.settings.png" Stretch="Fill" />
                 </Button>
