@@ -12,8 +12,7 @@
 		Width="320"
 		Height="177"
         Icon="Resource/HUSauth.ico"
-        ShowInTaskbar="{Binding IsShowTaskBar}"
-        Opacity="{Binding Opacity}">
+        ShowInTaskbar="{Binding IsShowTaskBar}">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -65,7 +64,7 @@
             <Grid Name="TitleBar" VerticalAlignment="Top" Height="auto">
                 <Image HorizontalAlignment="Left" Height="28" VerticalAlignment="Top" RenderOptions.BitmapScalingMode="HighQuality" Source="Resource/HUSauth.png" />
                 <Label Content="HUSauth" Margin="32,0,0,0" Width="auto" Height="auto" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Meiryo" Foreground="Gray" />
-                <Label Content="{Binding version}" Margin="94,0,0,0" Width="auto" Height="auto" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Meiryo" Foreground="Gray" Padding="0,5,5,5" />
+                <Label Content="{Binding Version}" Margin="94,0,0,0" Width="auto" Height="auto" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Meiryo" Foreground="Gray" Padding="0,5,5,5" />
 
                 <StackPanel Orientation="Horizontal" Margin="0,0,3,0" HorizontalAlignment="Right" VerticalAlignment="Top">
                     <Button Name="MinimizeButton" WindowChrome.IsHitTestVisibleInChrome="True" Width="28" Height="20" Margin="0" BorderBrush="{x:Null}" Template="{DynamicResource MinimizeButton}" Command="{Binding MinimizeWindowCommand, Mode=OneWay}">

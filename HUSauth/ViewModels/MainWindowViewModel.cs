@@ -1,5 +1,6 @@
 ﻿using HUSauth.Helpers;
 using HUSauth.Models;
+using HUSauth.Views;
 using Livet;
 using Livet.Commands;
 using Livet.EventListeners;
@@ -9,13 +10,11 @@ using Microsoft.Win32;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Forms;
 
 namespace HUSauth.ViewModels
 {
@@ -63,37 +62,38 @@ namespace HUSauth.ViewModels
          * 自動的にUIDispatcher上での通知に変換されます。変更通知に際してUIDispatcherを操作する必要はありません。
          */
 
-        public Network network;
-        private Version _version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-        string appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        private readonly Version _version = Assembly.GetExecutingAssembly().GetName().Version;
+        private readonly string _appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        private Network _network;
 
-        private string version
+        public string Version
         {
             get { return _version.ToString(); }
         }
 
+// ReSharper disable once UnusedMember.Global
         public void Initialize()
         {
             ChangeStatusBarString("ネットワーク認証を確認しています");
-            
+
             Settings.Initialize();
-            
+
             if (Settings.ID != null || Settings.Password != "")
             {
                 ID = Settings.ID;
                 Password = Settings.Password;
 
-                SystemEvents.PowerModeChanged += new PowerModeChangedEventHandler(SystemEvents_PowerModeChanged);
+                SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
             }
 
-            network = new Network();
-            var listener = new PropertyChangedEventListener(network);
-            listener.RegisterHandler((sender, e) => ViewUpdateHandler(sender, e));
-            this.CompositeDisposable.Add(listener);
+            _network = new Network();
+            var listener = new PropertyChangedEventListener(_network);
+            listener.RegisterHandler(ViewUpdateHandler);
+            CompositeDisposable.Add(listener);
 
-            network.StartAuthenticationCheckTimer();
+            _network.StartAuthenticationCheckTimer();
 
-            if (network.IsAvailable() == true)
+            if (_network.IsAvailable())
             {
                 UpdateCheck();
             }
@@ -101,19 +101,19 @@ namespace HUSauth.ViewModels
 
         private async void UpdateCheck() // 本来ならここに書くべきではない気もするけどしょうがないじゃん
         {
-            if(Settings.AllowUpdateCheck == false)
+            if (Settings.AllowUpdateCheck == false)
             {
                 return;
             }
 
             var uc = new UpdateChecker();
-            UpdateInfoPack uip = await Task.Run(() => uc.UpdateCheck(version));
+            UpdateInfoPack uip = await Task.Run(() => uc.UpdateCheck(Version));
 
-            if (uip.UpdateAvailable == true)
+            if (uip.UpdateAvailable)
             {
-                if(File.Exists(Path.Combine(appPath, "SoftwareUpdater.exe")) == true)
+                if (File.Exists(Path.Combine(_appPath, "SoftwareUpdater.exe")))
                 {
-                    if (Settings.AllowAutoUpdate == true)
+                    if (Settings.AllowAutoUpdate)
                     {
                         if (ID != null && Password != null)
                         {
@@ -123,15 +123,16 @@ namespace HUSauth.ViewModels
                             Settings.WriteSettings();
                         }
 
-                        Process.Start(Path.Combine(appPath, "SoftwareUpdater.exe"));
+                        Process.Start(Path.Combine(_appPath, "SoftwareUpdater.exe"));
 
                         NotifyIconHelper.MainWindowExit();
                         return;
                     }
                 }
 
-                MessageBoxResult result = System.Windows.MessageBox.Show(
-                    "新しいバージョンの HUSauth が見つかりました。\n" + uip.CurrentVersion + " -> " + uip.AvailableVersion + "\n\nダウンロードしますか？",
+                MessageBoxResult result = MessageBox.Show(
+                    "新しいバージョンの HUSauth が見つかりました。\n" + uip.CurrentVersion + " -> " + uip.AvailableVersion +
+                    "\n\nダウンロードしますか？",
                     "アップデートのお知らせ",
                     MessageBoxButton.YesNo,
                     MessageBoxImage.Information);
@@ -145,34 +146,35 @@ namespace HUSauth.ViewModels
 
         private async void SystemEvents_PowerModeChanged(object sender, PowerModeChangedEventArgs e)
         {
-            if (network.IsAvailable() == true)
+            if (_network.IsAvailable())
             {
                 return;
             }
 
-            network.isStarted = false;
-            network.StopAuthenticationCheckTimer();
+            _network.IsStarted = false;
+            _network.StopAuthenticationCheckTimer();
 
             ChangeStatusBarString("ネットワーク認証を確認しています");
 
-            var IsConnected = false;
+            bool isConnected = false;
 
             try
             {
-                IsConnected = await Task.Run(() => network.IsAvailable());
+                isConnected = await Task.Run(() => _network.IsAvailable());
             }
             catch
             {
                 ChangeStatusBarString("ネットワークに接続されていません");
             }
 
-            if (IsConnected == true)
+            if (isConnected)
             {
                 ChangeStatusBarString("認証されています");
             }
             else
             {
-                await Task.Run(() => {
+                await Task.Run(() =>
+                {
                     for (int i = 0; i <= 60; i++)
                     {
                         if (i == 60)
@@ -181,7 +183,7 @@ namespace HUSauth.ViewModels
                             return;
                         }
 
-                        if (network.CheckIPAddress() == true)
+                        if (_network.CheckIPAddress())
                         {
                             break;
                         }
@@ -189,7 +191,7 @@ namespace HUSauth.ViewModels
                         Thread.Sleep(1000);
                     }
                 });
-                
+
                 Login();
 
                 if (IsShowTaskBar == false)
@@ -198,8 +200,82 @@ namespace HUSauth.ViewModels
                 }
             }
 
-            network.StartAuthenticationCheckTimer();
+            _network.StartAuthenticationCheckTimer();
         }
+
+        public void ChangeStatusBarString(string str)
+        {
+            StatusBarString = str;
+        }
+
+        private void ViewUpdateHandler(object sender, PropertyChangedEventArgs e)
+        {
+            var worker = sender as Network;
+            if (worker == null) throw new ArgumentNullException();
+
+            if (e.PropertyName == "NetworkStatusString")
+            {
+                ChangeStatusBarString(worker.NetworkStatusString);
+            }
+            if (e.PropertyName == "NetworkStatusBaloonString")
+            {
+                NotifyIconHelper.ShowNotifyBaloon("HUSauth", worker.NetworkStatusBaloonString);
+            }
+        }
+
+        #region IsShowTaskBar変更通知プロパティ
+
+        private bool _IsShowTaskBar = true;
+
+        public bool IsShowTaskBar
+        {
+            get { return _IsShowTaskBar; }
+            set
+            {
+                if (_IsShowTaskBar == value)
+                    return;
+                _IsShowTaskBar = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        #endregion IsShowTaskBar変更通知プロパティ
+
+        #region ID変更通知プロパティ
+
+        private string _ID;
+
+        public string ID
+        {
+            get { return _ID; }
+            set
+            {
+                if (_ID == value)
+                    return;
+                _ID = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        #endregion ID変更通知プロパティ
+
+        #region Password変更通知プロパティ
+
+        private string _Password;
+
+        public string Password
+        {
+            get { return _Password; }
+            set
+            {
+                if (_Password == value)
+                    return;
+                _Password = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        #endregion Password変更通知プロパティ
 
         #region CloseCommand
 
@@ -278,8 +354,8 @@ namespace HUSauth.ViewModels
             ChangeStatusBarString("認証中...");
             LoginButtonIsEnabled = false;
 
-            var id = ID;
-            var password = Password;
+            string id = ID;
+            string password = Password;
 
             await Task.Run(() =>
             {
@@ -291,7 +367,7 @@ namespace HUSauth.ViewModels
                         return;
                     }
 
-                    if (network.CheckIPAddress() == true)
+                    if (_network.CheckIPAddress())
                     {
                         break;
                     }
@@ -300,11 +376,11 @@ namespace HUSauth.ViewModels
                 }
             });
 
-            await Task.Run(() => 
+            await Task.Run(() =>
             {
                 try
                 {
-                    network.DoAuth(id, password);
+                    _network.DoAuth(id, password);
                 }
                 catch (NullException e)
                 {
@@ -315,15 +391,17 @@ namespace HUSauth.ViewModels
             int j = 0;
             while (j < 60)
             {
-                var IsConnected = false;
+                bool isConnected = false;
 
                 try
                 {
-                    IsConnected = await Task.Run(() => network.IsAvailable());
+                    isConnected = await Task.Run(() => _network.IsAvailable());
                 }
-                catch { }
+                catch
+                {
+                }
 
-                if (IsConnected)
+                if (isConnected)
                 {
                     ChangeStatusBarString("認証されています");
                     UpdateCheck();
@@ -344,23 +422,25 @@ namespace HUSauth.ViewModels
         #endregion LoginCommand
 
         #region LoginButtonIsEnabled変更通知プロパティ
+
         private bool _LoginButtonIsEnabled = true;
 
         public bool LoginButtonIsEnabled
         {
-            get
-            { return _LoginButtonIsEnabled; }
+            get { return _LoginButtonIsEnabled; }
             set
-            { 
+            {
                 if (_LoginButtonIsEnabled == value)
                     return;
                 _LoginButtonIsEnabled = value;
                 RaisePropertyChanged();
             }
         }
-        #endregion
+
+        #endregion LoginButtonIsEnabled変更通知プロパティ
 
         #region ConfigCommand
+
         private ViewModelCommand _ConfigCommand;
 
         public ViewModelCommand ConfigCommand
@@ -377,12 +457,14 @@ namespace HUSauth.ViewModels
 
         public void Config()
         {
-            var cw = new Views.ConfigWindow();
+            var cw = new ConfigWindow();
             cw.ShowDialog();
         }
-        #endregion
+
+        #endregion ConfigCommand
 
         #region AboutCommand
+
         private ViewModelCommand _AboutCommand;
 
         public ViewModelCommand AboutCommand
@@ -399,10 +481,11 @@ namespace HUSauth.ViewModels
 
         public void About()
         {
-            var aw = new Views.AboutWindow();
+            var aw = new AboutWindow();
             aw.ShowDialog();
         }
-        #endregion
+
+        #endregion AboutCommand
 
         #region StatusBarString変更通知プロパティ
 
@@ -411,8 +494,7 @@ namespace HUSauth.ViewModels
 
         public string StatusBarString
         {
-            get
-            { return _StatusBarString; }
+            get { return _StatusBarString; }
             set
             {
                 if (_StatusBarString == value)
@@ -423,80 +505,5 @@ namespace HUSauth.ViewModels
         }
 
         #endregion StatusBarString変更通知プロパティ
-
-        public void ChangeStatusBarString(string str)
-        {
-            StatusBarString = str;
-        }
-
-        private void ViewUpdateHandler(object sender, PropertyChangedEventArgs e)
-        {
-            var worker = sender as Network;
-            if (e.PropertyName == "NetworkStatusString")
-            {
-                ChangeStatusBarString(worker.NetworkStatusString);
-            }
-            if (e.PropertyName == "NetworkStatusBaloonString")
-            {
-                NotifyIconHelper.ShowNotifyBaloon("HUSauth", worker.NetworkStatusBaloonString);
-            }
-        }
-
-        #region IsShowTaskBar変更通知プロパティ
-
-        private bool _IsShowTaskBar = true;
-
-        public bool IsShowTaskBar
-        {
-            get
-            { return _IsShowTaskBar; }
-            set
-            {
-                if (_IsShowTaskBar == value)
-                    return;
-                _IsShowTaskBar = value;
-                RaisePropertyChanged();
-            }
-        }
-
-        #endregion IsShowTaskBar変更通知プロパティ
-
-        #region ID変更通知プロパティ
-
-        private string _ID;
-
-        public string ID
-        {
-            get
-            { return _ID; }
-            set
-            {
-                if (_ID == value)
-                    return;
-                _ID = value;
-                RaisePropertyChanged();
-            }
-        }
-
-        #endregion ID変更通知プロパティ
-
-        #region Password変更通知プロパティ
-
-        private string _Password;
-
-        public string Password
-        {
-            get
-            { return _Password; }
-            set
-            {
-                if (_Password == value)
-                    return;
-                _Password = value;
-                RaisePropertyChanged();
-            }
-        }
-
-        #endregion Password変更通知プロパティ
     }
 }

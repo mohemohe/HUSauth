@@ -1,36 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.ComponentModel;
-
+﻿using HUSauth.Models;
 using Livet;
 using Livet.Commands;
-using Livet.Messaging;
-using Livet.Messaging.IO;
-using Livet.EventListeners;
 using Livet.Messaging.Windows;
-
-using HUSauth.Models;
 
 namespace HUSauth.ViewModels
 {
     public class ConfigWindowViewModel : ViewModel
     {
-        /* コマンド、プロパティの定義にはそれぞれ 
-         * 
+        /* コマンド、プロパティの定義にはそれぞれ
+         *
          *  lvcom   : ViewModelCommand
          *  lvcomn  : ViewModelCommand(CanExecute無)
          *  llcom   : ListenerCommand(パラメータ有のコマンド)
          *  llcomn  : ListenerCommand(パラメータ有のコマンド・CanExecute無)
          *  lprop   : 変更通知プロパティ(.NET4.5ではlpropn)
-         *  
+         *
          * を使用してください。
-         * 
+         *
          * Modelが十分にリッチであるならコマンドにこだわる必要はありません。
          * View側のコードビハインドを使用しないMVVMパターンの実装を行う場合でも、ViewModelにメソッドを定義し、
          * LivetCallMethodActionなどから直接メソッドを呼び出してください。
-         * 
+         *
          * ViewModelのコマンドを呼び出せるLivetのすべてのビヘイビア・トリガー・アクションは
          * 同様に直接ViewModelのメソッドを呼び出し可能です。
          */
@@ -42,19 +32,19 @@ namespace HUSauth.ViewModels
         /* Modelからの変更通知などの各種イベントを受け取る場合は、PropertyChangedEventListenerや
          * CollectionChangedEventListenerを使うと便利です。各種ListenerはViewModelに定義されている
          * CompositeDisposableプロパティ(LivetCompositeDisposable型)に格納しておく事でイベント解放を容易に行えます。
-         * 
+         *
          * ReactiveExtensionsなどを併用する場合は、ReactiveExtensionsのCompositeDisposableを
          * ViewModelのCompositeDisposableプロパティに格納しておくのを推奨します。
-         * 
+         *
          * LivetのWindowテンプレートではViewのウィンドウが閉じる際にDataContextDisposeActionが動作するようになっており、
          * ViewModelのDisposeが呼ばれCompositeDisposableプロパティに格納されたすべてのIDisposable型のインスタンスが解放されます。
-         * 
+         *
          * ViewModelを使いまわしたい時などは、ViewからDataContextDisposeActionを取り除くか、発動のタイミングをずらす事で対応可能です。
          */
 
         /* UIDispatcherを操作する場合は、DispatcherHelperのメソッドを操作してください。
          * UIDispatcher自体はApp.xaml.csでインスタンスを確保してあります。
-         * 
+         *
          * LivetのViewModelではプロパティ変更通知(RaisePropertyChanged)やDispatcherCollectionを使ったコレクション変更通知は
          * 自動的にUIDispatcher上での通知に変換されます。変更通知に際してUIDispatcherを操作する必要はありません。
          */
@@ -62,6 +52,7 @@ namespace HUSauth.ViewModels
         #region プロパティ
 
         #region ExcludeIP1変更通知プロパティ
+
         private string _ExcludeIP1;
 
         public string ExcludeIP1
@@ -76,10 +67,11 @@ namespace HUSauth.ViewModels
                 RaisePropertyChanged();
             }
         }
-        #endregion
 
+        #endregion ExcludeIP1変更通知プロパティ
 
         #region ExcludeIP2変更通知プロパティ
+
         private string _ExcludeIP2;
 
         public string ExcludeIP2
@@ -87,17 +79,18 @@ namespace HUSauth.ViewModels
             get
             { return _ExcludeIP2; }
             set
-            { 
+            {
                 if (_ExcludeIP2 == value)
                     return;
                 _ExcludeIP2 = value;
                 RaisePropertyChanged();
             }
         }
-        #endregion
 
+        #endregion ExcludeIP2変更通知プロパティ
 
         #region ExcludeIP3変更通知プロパティ
+
         private string _ExcludeIP3;
 
         public string ExcludeIP3
@@ -105,17 +98,18 @@ namespace HUSauth.ViewModels
             get
             { return _ExcludeIP3; }
             set
-            { 
+            {
                 if (_ExcludeIP3 == value)
                     return;
                 _ExcludeIP3 = value;
                 RaisePropertyChanged();
             }
         }
-        #endregion
 
+        #endregion ExcludeIP3変更通知プロパティ
 
         #region AnotherAuthServer変更通知プロパティ
+
         private string _AnotherAuthServer;
 
         public string AnotherAuthServer
@@ -123,16 +117,18 @@ namespace HUSauth.ViewModels
             get
             { return _AnotherAuthServer; }
             set
-            { 
+            {
                 if (_AnotherAuthServer == value)
                     return;
                 _AnotherAuthServer = value;
                 RaisePropertyChanged();
             }
         }
-        #endregion
+
+        #endregion AnotherAuthServer変更通知プロパティ
 
         #region AllowUpdateCheck変更通知プロパティ
+
         private bool _AllowUpdateCheck;
 
         public bool AllowUpdateCheck
@@ -140,26 +136,21 @@ namespace HUSauth.ViewModels
             get
             { return _AllowUpdateCheck; }
             set
-            { 
+            {
                 if (_AllowUpdateCheck == value)
                     return;
                 _AllowUpdateCheck = value;
 
-                if (value == true)
-                {
-                    AllowAutoUpdate_IsEnable = true;
-                }
-                else
-                {
-                    AllowAutoUpdate_IsEnable = false;
-                }
+                AllowAutoUpdate_IsEnable = value;
 
                 RaisePropertyChanged();
             }
         }
-        #endregion
+
+        #endregion AllowUpdateCheck変更通知プロパティ
 
         #region AllowAutoUpdate変更通知プロパティ
+
         private bool _AllowAutoUpdate;
 
         public bool AllowAutoUpdate
@@ -167,17 +158,18 @@ namespace HUSauth.ViewModels
             get
             { return _AllowAutoUpdate; }
             set
-            { 
+            {
                 if (_AllowAutoUpdate == value)
                     return;
                 _AllowAutoUpdate = value;
                 RaisePropertyChanged();
             }
         }
-        #endregion
 
+        #endregion AllowAutoUpdate変更通知プロパティ
 
         #region AllowAutoUpdate_IsEnable変更通知プロパティ
+
         private bool _AllowAutoUpdate_IsEnable;
 
         public bool AllowAutoUpdate_IsEnable
@@ -185,17 +177,17 @@ namespace HUSauth.ViewModels
             get
             { return _AllowAutoUpdate_IsEnable; }
             set
-            { 
+            {
                 if (_AllowAutoUpdate_IsEnable == value)
                     return;
                 _AllowAutoUpdate_IsEnable = value;
                 RaisePropertyChanged();
             }
         }
-        #endregion
 
+        #endregion AllowAutoUpdate_IsEnable変更通知プロパティ
 
-        #endregion
+        #endregion プロパティ
 
         public void Initialize()
         {
@@ -223,6 +215,7 @@ namespace HUSauth.ViewModels
         }
 
         #region OKCommand
+
         private ViewModelCommand _OKCommand;
 
         public ViewModelCommand OKCommand
@@ -242,9 +235,11 @@ namespace HUSauth.ViewModels
             WriteSettings();
             Close();
         }
-        #endregion
-        
+
+        #endregion OKCommand
+
         #region CancelCommand
+
         private ViewModelCommand _CancelCommand;
 
         public ViewModelCommand CancelCommand
@@ -263,9 +258,11 @@ namespace HUSauth.ViewModels
         {
             Close();
         }
-        #endregion
+
+        #endregion CancelCommand
 
         #region ApplyCommand
+
         private ViewModelCommand _ApplyCommand;
 
         public ViewModelCommand ApplyCommand
@@ -284,7 +281,8 @@ namespace HUSauth.ViewModels
         {
             WriteSettings();
         }
-        #endregion
+
+        #endregion ApplyCommand
 
         public void Close()
         {
