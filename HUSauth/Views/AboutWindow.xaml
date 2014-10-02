@@ -34,7 +34,7 @@
     <Grid>
         <Image HorizontalAlignment="Left" Height="100" Margin="10,10,0,0" VerticalAlignment="Top" Width="100" Source="Resource/HUSauth.png" RenderOptions.BitmapScalingMode="HighQuality" />
         <Label Content="HUSauth" HorizontalAlignment="Left" Margin="115,10,0,0" VerticalAlignment="Top" FontFamily="Meiryo" FontSize="48" Foreground="#FF606060" Padding="5,0,0,0" />
-        <Label Content="{Binding version}" HorizontalAlignment="Left" Margin="199,64,0,0" VerticalAlignment="Top" Padding="0,5,5,5" Foreground="#FFA0A0A0" />
+        <Label Content="{Binding Version}" HorizontalAlignment="Left" Margin="199,64,0,0" VerticalAlignment="Top" Padding="0,5,5,5" Foreground="#FFA0A0A0" />
         <Label HorizontalAlignment="Left" Margin="115,89,0,0" VerticalAlignment="Top" Padding="5,5,5,0">
             <Hyperlink NavigateUri="http://ghippos.net/app/husauth.html" RequestNavigate="Hyperlink_Navigate">
                 http://ghippos.net/app/husauth.html
@@ -58,7 +58,7 @@
             <TabItem Header="北海道科学大学 ネットワーク利用規約">
                 <Grid>
                     <ScrollViewer ScrollViewer.VerticalScrollBarVisibility="Auto">
-                        <TextBlock Text="{Binding networkPolicy}" VerticalAlignment="Top" FontFamily="Meiryo" Padding="5" />
+                        <TextBlock Text="{Binding NetworkPolicy}" VerticalAlignment="Top" FontFamily="Meiryo" Padding="5" />
                     </ScrollViewer>
                 </Grid>
             </TabItem>

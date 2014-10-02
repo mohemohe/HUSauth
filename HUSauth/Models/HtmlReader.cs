@@ -6,16 +6,16 @@ namespace HUSauth.Models
 {
     public class HtmlReader
     {
-        public string HtmlRead(string Url)
+        public string HtmlRead(string url)
         {
             using (var wc = new WebClient())
             {
-                var html = "";
+                string html = "";
                 try
                 {
-                    var st = wc.OpenRead(Url);
+                    Stream st = wc.OpenRead(url);
 
-                    var enc = Encoding.GetEncoding("UTF-8");
+                    Encoding enc = Encoding.GetEncoding("UTF-8");
                     var sr = new StreamReader(st, enc);
                     html = sr.ReadToEnd();
                 }

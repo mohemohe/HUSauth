@@ -52,11 +52,13 @@ namespace HUSauth.Models
                 }
             }
 
-            var uip = new UpdateInfoPack();
-            uip.UpdateAvailable = updateAvailable;
-            uip.CurrentVersion = string.Join(".", currentVersionArray);
-            uip.AvailableVersion = _uip.AvailableVersion;
-            uip.DownloadURL = _uip.DownloadURL; ;
+            var uip = new UpdateInfoPack
+            {
+                UpdateAvailable = updateAvailable,
+                CurrentVersion = string.Join(".", currentVersionArray),
+                AvailableVersion = _uip.AvailableVersion,
+                DownloadURL = _uip.DownloadURL
+            };
 
             return uip;
         }
@@ -104,15 +106,14 @@ namespace HUSauth.Models
         {
             if (version == "")
             {
-                return new int[4] { 0, 0, 0, 0 };
+                return new[] { 0, 0, 0, 0 };
             }
 
             var result = new int[3];
-            var _result = new string[4];
 
             try
             {
-                _result = version.Split('.');
+                string[] _result = version.Split('.');
 
                 for (int i = 0; i < 3; i++)
                 {
@@ -121,7 +122,7 @@ namespace HUSauth.Models
             }
             catch
             {
-                return new int[4] { 0, 0, 0, 0 };
+                return new[] { 0, 0, 0, 0 };
             }
 
             return result;

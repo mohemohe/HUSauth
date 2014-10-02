@@ -50,55 +50,67 @@ namespace HUSauth.ViewModels
          * 自動的にUIDispatcher上での通知に変換されます。変更通知に際してUIDispatcherを操作する必要はありません。
          */
 
-        private Version _version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+        private readonly Version _version = Assembly.GetExecutingAssembly().GetName().Version;
 
-        public string version
+        public string Version
         {
-            get { return "Version " + _version.ToString(); }
+            get { return "Version " + _version; }
         }
 
-        public string networkPolicy
+        public static string NetworkPolicy
         {
             get
             {
                 var a = Assembly.GetExecutingAssembly();
                 var s = a.GetManifestResourceStream("HUSauth.Licenses.NetworkPolicy.txt");
 
-                s.Position = 0;
-                using (var sr = new StreamReader(s, Encoding.UTF8))
+                if (s != null)
                 {
-                    return sr.ReadToEnd();
+                    s.Position = 0;
+                    using (var sr = new StreamReader(s, Encoding.UTF8))
+                    {
+                        return sr.ReadToEnd();
+                    }
                 }
+                return null;
             }
         }
 
-        public string LivetLicense
+        public static string LivetLicense
         {
             get
             {
                 var a = Assembly.GetExecutingAssembly();
                 var s = a.GetManifestResourceStream("HUSauth.Licenses.Livet.txt");
 
-                s.Position = 0;
-                using (var sr = new StreamReader(s, Encoding.UTF8))
+                if (s != null)
                 {
-                    return sr.ReadToEnd();
+                    s.Position = 0;
+                    using (var sr = new StreamReader(s, Encoding.UTF8))
+                    {
+                        return sr.ReadToEnd();
+                    }
                 }
+                return null;
             }
         }
 
-        public string ModernUIIconsLicense
+        public static string ModernUIIconsLicense
         {
             get
             {
                 var a = Assembly.GetExecutingAssembly();
                 var s = a.GetManifestResourceStream("HUSauth.Licenses.ModernUIIcons.txt");
 
-                s.Position = 0;
-                using (var sr = new StreamReader(s, Encoding.UTF8))
+                if (s != null)
                 {
-                    return sr.ReadToEnd();
+                    s.Position = 0;
+                    using (var sr = new StreamReader(s, Encoding.UTF8))
+                    {
+                        return sr.ReadToEnd();
+                    }
                 }
+                return null;
             }
         }
 
