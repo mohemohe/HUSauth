@@ -1,4 +1,6 @@
-﻿HUSauth
+# [!] This project moved to [HUSauth2](https://github.com/mohemohe/HUSauth2) . [!]
+
+HUSauth
 =======
 
 ### これ is 何
