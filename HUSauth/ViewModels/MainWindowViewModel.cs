@@ -404,7 +404,12 @@ namespace HUSauth.ViewModels
                 if (isConnected)
                 {
                     ChangeStatusBarString("認証されています");
-                    UpdateCheck();
+
+                    try
+                    {
+                        UpdateCheck();
+                    }
+                    catch { }
 
                     LoginButtonIsEnabled = true;
 
